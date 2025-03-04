@@ -1,0 +1,80 @@
+body {
+    font-family: Arial, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+#teacher-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+.teacher-card {
+    text-align: center;
+    cursor: pointer;
+}
+.teacher-card img {
+    width: 150px;
+    height: 150px;
+    border-radius: 10px;
+}
+.stars {
+    font-size: 20px;
+}
+.stars.grey {
+    color: #ccc;
+}
+.teacher-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+#teacher-photo {
+    width: 200px;
+    height: 200px;
+}
+#teacher-bio {
+    margin: 20px 0;
+}
+#teacher-classes {
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+#teacher-classes td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 150px;
+}
+#rating-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 400px;
+}
+#star-rating {
+    font-size: 24px;
+    cursor: pointer;
+}
+#star-rating .star:hover,
+#star-rating .star.selected {
+    color: gold;
+}
+textarea {
+    padding: 5px;
+    height: 100px;
+}
+button {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #0056b3;
+}
+#reviews div {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+}

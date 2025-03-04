@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Profile</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div id="teacher-profile">
+        <div class="teacher-header">
+            <img id="teacher-photo" src="" alt="Teacher Photo">
+            <h2 id="teacher-name"></h2>
+        </div>
+        <p id="teacher-bio"></p>
+        <table id="teacher-classes"></table>
+        <h3>Your Rating</h3>
+        <form id="rating-form">
+            <div id="star-rating"></div>
+            <textarea id="review" placeholder="Write your review"></textarea>
+            <button type="submit">Submit Rating</button>
+        </form>
+        <h3>Average Rating: <span id="avg-rating"></span></h3>
+        <div id="reviews"></div>
+    </div>
+    <script src="/teacher/teacher.js"></script>
+</body>
+</html>
