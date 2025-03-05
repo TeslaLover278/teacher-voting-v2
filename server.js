@@ -134,7 +134,7 @@ app.get('/api/teachers', (req, res) => {
         const avgRating = teacherRatings.length
             ? teacherRatings.reduce((sum, r) => sum + r.rating, 0) / teacherRatings.length
             : null;
-        return { ...teacher, avg_rating: avgRating, rating_count: teacherRatings.length };
+        return { ...teacher, avg_rating: avgRating, rating_count: teacherRatings.length, ratings: teacherRatings };
     });
 
     const sortBy = req.query.sort || 'default';
@@ -175,14 +175,58 @@ app.get('/api/teachers/:id', (req, res) => {
     res.json({ ...teacher, avg_rating: avgRating, ratings: teacherRatings, rating_count: teacherRatings.length });
 });
 
-// Submit a rating
+// Submit or update a rating (edit past vote if already voted)
 app.post('/api/ratings', (req, res) => {
     const { teacher_id, rating, review } = req.body;
-    const newRating = { teacher_id: parseInt(teacher_id), rating: parseInt(rating), review };
-    ratings.push(newRating);
-    console.log('Server - Added rating for teacher:', teacher_id);
-    console.log('Server - Ratings total:', ratings.length);
+    const teacherId = parseInt(teacher_id);
+    const newRating = { teacher_id, rating: parseInt(rating), review };
+
+    const cookieStr = req.headers.cookie?.split('votedTeachers=')[1]?.split(';')[0] || '';
+    const votedArray = cookieStr ? cookieStr.split(',').map(id => id.trim()).filter(Boolean) : [];
+
+    if (votedArray.includes(teacherId.toString())) {
+        // Edit existing vote
+        ratings = ratings.filter(r => r.teacher_id !== teacherId); // Remove old vote
+        ratings.push(newRating); // Add new vote
+        setCookie(res, 'votedTeachers', votedArray.join(','), 365);
+        console.log('Server - Updated rating for teacher:', teacher_id);
+        console.log('Server - New rating:', rating);
+    } else {
+        // Add new vote
+        ratings.push(newRating);
+        votedArray.push(teacherId.toString());
+        setCookie(res, 'votedTeachers', votedArray.join(','), 365);
+        console.log('Server - Added rating for teacher:', teacher_id);
+        console.log('Server - Ratings total:', ratings.length);
+    }
+
     res.json({ message: 'Rating submitted!' });
+});
+
+// Update a rating (for admin or user, but here for completeness—kept as is)
+app.put('/api/ratings/:teacherId', (req, res) => {
+    const teacherId = parseInt(req.params.teacherId);
+    const { rating, review } = req.body;
+    const voteIndex = ratings.findIndex(r => r.teacher_id === teacherId);
+    if (voteIndex === -1) return res.status(404).json({ error: 'Vote not found' });
+    ratings[voteIndex] = { teacher_id: teacherId, rating: parseInt(rating), review: review || '' };
+    console.log('Server - Updated vote for teacher:', teacherId);
+    console.log('Server - New rating:', rating);
+    res.json({ message: 'Vote updated successfully!' });
+});
+
+// Delete a rating (for admin or user update logic)
+app.delete('/api/ratings/:teacherId', authenticateAdmin, (req, res) => {
+    const teacherId = parseInt(req.params.teacherId);
+    const initialLength = ratings.length;
+    ratings = ratings.filter(r => r.teacher_id !== teacherId);
+    if (ratings.length < initialLength) {
+        console.log('Server - Deleted vote for teacher:', teacherId);
+        console.log('Server - Votes remaining:', ratings.length);
+        res.json({ message: 'Vote deleted successfully!' });
+    } else {
+        res.status(404).json({ error: 'Vote not found' });
+    }
 });
 
 // Add a new teacher (admin only)
@@ -219,6 +263,13 @@ app.delete('/api/admin/teachers/:id', authenticateAdmin, (req, res) => {
 app.get('/', (req, res) => {
     res.sendFile('index.html', { root: 'pages/home' });
 });
+
+// Helper function to set cookies in the response
+function setCookie(res, name, value, days) {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    res.setHeader('Set-Cookie', `${name}=${value}; Expires=${date.toUTCString()}; Path=/`);
+}
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);

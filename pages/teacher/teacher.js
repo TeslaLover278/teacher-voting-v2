@@ -84,24 +84,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 reviewsDiv.appendChild(div);
             });
 
-            // Display all reviews with ratings and comments
-            const allReviewsDiv = document.getElementById('all-reviews');
-            allReviewsDiv.innerHTML = ''; // Clear existing all-reviews
-            if (teacher.ratings && teacher.ratings.length > 0) {
-                teacher.ratings.forEach(r => {
-                    const reviewDiv = document.createElement('div');
-                    reviewDiv.className = 'review-entry';
-                    reviewDiv.innerHTML = `
-                        <p><strong>Rating:</strong> ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</p>
-                        <p><strong>Comment:</strong> ${r.review || 'No comment provided'}</p>
-                        <hr>
-                    `;
-                    allReviewsDiv.appendChild(reviewDiv);
-                });
-            } else {
-                allReviewsDiv.innerHTML = '<p>No reviews yet.</p>';
-            }
-
             const cookieStr = getCookie('votedTeachers') || '';
             const votedArray = cookieStr ? cookieStr.split(',').map(id => id.trim()).filter(Boolean) : [];
             const hasVoted = votedArray.includes(teacherId.toString());
@@ -109,9 +91,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const ratingForm = document.getElementById('rating-form');
             const ratingHeading = document.getElementById('rating-heading');
             if (hasVoted) {
-                ratingForm.style.display = 'block'; // Allow removing previous vote and adding new
+                ratingForm.style.display = 'block'; // Allow editing existing votes
                 ratingHeading.style.display = 'block';
-                console.log('Vote - Form shown for updating vote for teacher', teacherId);
+                console.log('Vote - Form shown for editing existing vote for teacher', teacherId);
             } else {
                 ratingForm.style.display = 'block';
                 ratingHeading.style.display = 'block';
@@ -126,11 +108,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Only show modal and set error messages for critical HTTP errors
             if (error.message.includes('HTTP error')) {
                 showModal('Error loading teacher data. Please try again.');
-                document.getElementById('teacher-title').textContent = `Teacher ID ${teacherId}`;
-                document.getElementById('teacher-bio').textContent = 'No bio available due to error.';
-                document.getElementById('teacher-summary').textContent = 'No summary available due to error.';
-                document.getElementById('avg-rating').innerHTML = '☆☆☆☆☆ (0)';
-                document.getElementById('all-reviews').innerHTML = '<p>No reviews available due to error.</p>';
             }
             const ratingForm = document.getElementById('rating-form');
             const ratingHeading = document.getElementById('rating-heading');
@@ -144,6 +121,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 img.src = '/images/default-teacher.jpg';
                 img.alt = `Default image for teacher ID ${teacherId}`; // Update alt text
             };
+            // Set default values if fetch fails
+            document.getElementById('teacher-title').textContent = `Teacher ID ${teacherId}`;
+            document.getElementById('teacher-bio').textContent = 'No bio available due to error.';
+            document.getElementById('teacher-summary').textContent = 'No summary available due to error.';
+            document.getElementById('avg-rating').innerHTML = '☆☆☆☆☆ (0)';
         }
     }
 
@@ -191,14 +173,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             let hasVoted = votedArray.includes(teacherId.toString());
 
             if (hasVoted) {
-                // Remove the previous vote for this teacher before adding the new one
+                // Edit existing vote
                 await fetch(`/api/ratings/${teacherId}`, {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' }
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rating: selectedRating, review })
                 });
-                // Update the cookie to keep the teacher ID (since they’re still voting)
-                setCookie('votedTeachers', votedArray.join(','), 365);
-                showModal('Your previous vote has been removed, and your new vote has been recorded.');
+                showModal('Your previous vote has been updated.');
             } else {
                 // Add new vote
                 votedArray.push(teacherId.toString());
