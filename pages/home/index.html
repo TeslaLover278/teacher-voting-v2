@@ -3,25 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Rating App</title>
+    <title>Rate Your Teacher</title>
     <link rel="stylesheet" href="/styles.css">
+    <!-- Version 1.15 -->
 </head>
 <body>
     <header class="site-header">
-        <img src="/images/logo.png" alt="Teacher Rating Logo" class="logo" onclick="window.location.href='/'">
-        <h1 class="header-title">Rate Your Teachers</h1>
+        <div class="header-content">
+            <img src="/images/logo.png" alt="Teacher Rating Logo" class="logo" onclick="window.location.href='/'">
+            <h1 class="header-title">Rate Your Teachers</h1>
+        </div>
         <button class="admin-btn" onclick="window.location.href='/admin/login.html'">Admin</button>
     </header>
     <div class="controls">
-        <input type="text" id="search-bar" placeholder="Search teachers...">
+        <input type="text" id="search-bar" placeholder="Search by teacher name...">
         <select id="sort-select">
             <option value="default">Default</option>
             <option value="alphabetical">Alphabetical</option>
-            <option value="ratings">Highest Rated</option>
+            <option value="ratings">Ratings</option>
         </select>
     </div>
-    <div id="teacher-grid"></div>
-    <footer>
+    <div id="teacher-grid" class="teacher-grid"></div>
+    <footer class="site-footer">
         <p>Missing Teacher? Contact <a href="mailto:reagan.hartney@gmail.com">reagan.hartney@gmail.com</a> to add a teacher!</p>
     </footer>
     <script src="/home/script.js"></script>

@@ -48,7 +48,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
 
             document.getElementById('teacher-title').textContent = teacher.name; // Set name as title
-            document.getElementById('teacher-name').textContent = teacher.name; // Keep for consistency (though not used in display now)
             document.getElementById('teacher-bio').textContent = teacher.bio || 'No bio available.';
             document.getElementById('teacher-summary').textContent = teacher.summary || 'No summary available.';
 
@@ -69,6 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             for (let i = 1; i <= 4; i++) {
                 const cell = topRow.insertCell();
                 cell.textContent = `Block ${i}`;
+                cell.className = 'schedule-header';
             }
 
             // Bottom row: Teacher's schedule (classes)
@@ -76,13 +76,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             for (let i = 0; i < 4; i++) {
                 const cell = bottomRow.insertCell();
                 cell.textContent = teacher.classes[i] || 'N/A';
+                cell.className = 'schedule-cell';
             }
 
             const reviewsDiv = document.getElementById('reviews');
             reviewsDiv.innerHTML = ''; // Clear existing reviews
             teacher.ratings.forEach(r => {
                 const div = document.createElement('div');
-                div.innerHTML = `<strong>${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</strong><br>${r.review || 'No review'}`;
+                div.className = 'review-item';
+                div.innerHTML = `<strong>${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</strong><br>${r.review || ''}`;
                 reviewsDiv.appendChild(div);
             });
 
@@ -150,7 +152,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         starRating.appendChild(star);
     }
     function updateStars() {
-        const stars = starRating.children;
+        const stars = starRating.getElementsByClassName('star');
         for (let i = 0; i < 5; i++) {
             stars[i].className = 'star' + (i < selectedRating ? ' selected' : '');
             stars[i].textContent = i < selectedRating ? '★' : '☆';
@@ -163,14 +165,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             showModal('Please select a rating!');
             return;
         }
-        const review = document.getElementById('review').value;
 
         try {
             console.log('Vote - Submitting for teacher', teacherId);
             const response = await fetch('/api/ratings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ teacher_id: teacherId, rating: selectedRating, review: review || '' })
+                body: JSON.stringify({ teacher_id: teacherId, rating: selectedRating })
             });
             if (!response.ok) {
                 const errorText = await response.text();
@@ -207,6 +208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // clearVotesForTesting();
 
     await loadTeacher().catch(error => console.error('LoadTeacher - Initial load error:', error.message, error.stack));
+    // Version 1.15
 });
 
 function setCookie(name, value, days) {
