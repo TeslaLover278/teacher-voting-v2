@@ -47,7 +47,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 img.alt = `Default image for ${teacher.name}`; // Update alt text for accessibility
             };
 
-            document.getElementById('teacher-name').textContent = teacher.name;
+            document.getElementById('teacher-title').textContent = teacher.name; // Set name as title
+            document.getElementById('teacher-name').textContent = teacher.name; // Keep for consistency (though not used in display now)
             document.getElementById('teacher-bio').textContent = teacher.bio || 'No bio available.';
             document.getElementById('teacher-summary').textContent = teacher.summary || 'No summary available.';
 
@@ -104,12 +105,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         } catch (error) {
             console.error('LoadTeacher - Error:', error.message);
-            // Only show modal for critical HTTP errors, not image load failures
+            // Only show modal for critical HTTP errors, not image load failures or data parsing
             if (error.message.includes('HTTP error')) {
                 showModal('Error loading teacher data. Please try again.');
-            } else {
-                // Log non-HTTP errors but don’t show modal unless critical
-                showModal('An unexpected error occurred. Please try refreshing the page.');
             }
             const ratingForm = document.getElementById('rating-form');
             const ratingHeading = document.getElementById('rating-heading');
@@ -123,11 +121,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 img.src = '/images/default-teacher.jpg';
                 img.alt = `Default image for teacher ID ${teacherId}`; // Update alt text
             };
-            // Set default name, bio, and summary if fetch fails
-            document.getElementById('teacher-name').textContent = `Teacher ID ${teacherId}`;
+            // Set default values if fetch fails
+            document.getElementById('teacher-title').textContent = `Teacher ID ${teacherId}`;
             document.getElementById('teacher-bio').textContent = 'No bio available due to error.';
             document.getElementById('teacher-summary').textContent = 'No summary available due to error.';
-            // Set default stars and vote count if fetch fails
             document.getElementById('avg-rating').innerHTML = '☆☆☆☆☆ (0)';
         }
     }
@@ -197,9 +194,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Vote - Error:', error.message);
             if (error.message.includes('HTTP error')) {
                 showModal('Error submitting your rating. Please try again.');
-            } else {
-                showModal('An unexpected error occurred while submitting your rating. Please try again.');
             }
+            // Removed the "An unexpected error occurred..." modal to prevent false positives
         }
     });
 
