@@ -182,9 +182,9 @@ app.post('/api/ratings', (req, res) => {
     const newRating = { teacher_id, rating: parseInt(rating), review: review || '' };
 
     const cookieStr = req.headers.cookie?.split('votedTeachers=')[1]?.split(';')[0] || '';
-    const votedArray = cookieStr ? cookieStr.split(',').map(id => id.trim()).filter(Boolean) : [];
+    const votedArray = cookieStr ? cookieStr.split(',').map(id => parseInt(id.trim())).filter(Boolean) : [];
 
-    if (votedArray.includes(teacherId.toString())) {
+    if (votedArray.includes(teacherId)) {
         // User has already voted for this teacher, return an error
         res.status(400).json({ error: 'You have already voted for this teacher.' });
         return;
@@ -192,7 +192,7 @@ app.post('/api/ratings', (req, res) => {
 
     // Add new vote and ensure it’s recorded
     ratings.push(newRating);
-    votedArray.push(teacherId.toString());
+    votedArray.push(teacherId);
     setCookie(res, 'votedTeachers', votedArray.join(','), 365);
     console.log('Server - Added rating for teacher:', teacher_id, 'Rating:', newRating);
     console.log('Server - Ratings total:', ratings.length, 'Updated ratings:', ratings);

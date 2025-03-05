@@ -87,8 +87,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             const cookieStr = getCookie('votedTeachers') || '';
-            const votedArray = cookieStr ? cookieStr.split(',').map(id => id.trim()).filter(Boolean) : [];
-            const hasVoted = votedArray.includes(teacherId.toString());
+            const votedArray = cookieStr ? cookieStr.split(',').map(id => parseInt(id.trim())).filter(Boolean) : [];
+            const hasVoted = votedArray.includes(parseInt(teacherId));
 
             const ratingForm = document.getElementById('rating-form');
             const ratingHeading = document.getElementById('rating-heading');
