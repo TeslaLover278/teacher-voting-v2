@@ -5,30 +5,50 @@ body {
     padding: 20px;
     background-color: #E6F0F8; /* Light gray-blue background from logo */
     color: #000000; /* Black text for readability */
-    position: relative; /* For absolute positioning of logo */
+    position: relative; /* For positioning header */
+    margin-top: 0; /* Reset margin to accommodate header */
+}
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Space between logo and title */
+    padding: 10px 20px;
+    background-color: #FFFFFF; /* White background for header */
+    border-bottom: 1px solid #00B7D1; /* Teal border for header */
+    position: fixed; /* Fix header at the top */
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000; /* Ensure header stays above other content */
 }
 .logo {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    width: 100px; /* Adjust size as needed for your logo */
+    position: relative; /* Remove absolute positioning, handled by header */
+    width: 50px; /* Half the size of 100px */
     height: auto;
     cursor: pointer;
 }
 .logo:hover {
     opacity: 0.8;
 }
-.page-title {
-    margin-left: 120px; /* Shift right to avoid logo overlap (adjust based on logo size) */
-    margin-top: 20px; /* Align with logo vertically */
-    font-size: 2em; /* Maintain or adjust size as needed */
+.header-title {
+    margin: 0; /* Remove default margins */
+    font-size: 1.5em; /* Smaller title size for header */
     color: #000000; /* Black text */
+    flex-grow: 1; /* Allow title to grow and center */
+    text-align: center; /* Center the title */
+}
+.page-title {
+    display: none; /* Hide the old page title since we use the header now */
+}
+.teacher-profile-container {
+    margin-left: 0; /* Reset margin since header handles positioning */
+    margin-top: 80px; /* Move down to fit header, adjust if needed */
 }
 .controls {
     margin-bottom: 20px;
     display: flex;
     gap: 10px;
-    margin-top: 80px; /* Reduced to account for title positioning, adjust if needed */
+    margin-top: 20px; /* Reduced to account for header, adjust if needed */
 }
 #search-bar, #sort-select {
     padding: 5px;

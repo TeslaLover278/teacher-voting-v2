@@ -81,18 +81,17 @@ document.getElementById('rating-form').addEventListener('submit', async (e) => {
     }
 
     // Update cookie to track only this teacher's vote, allowing voting on others by different users
-    const votedTeachers = getCookie('votedTeachers') ? getCookie('votedTeachers').split(',').filter(Boolean) : [];
+    let votedTeachers = getCookie('votedTeachers') ? getCookie('votedTeachers').split(',').filter(Boolean) : [];
+    // Reset cookie if testing (optional, comment out for production)
+    // votedTeachers = []; // Uncomment to reset for testing, then comment out after testing
     if (!votedTeachers.includes(teacherId.toString())) {
         votedTeachers.push(teacherId.toString());
         setCookie('votedTeachers', votedTeachers.join(','), 365);
     } else {
-        // Allow re-voting by clearing the vote for this teacher or notifying the user
+        // Allow re-voting by notifying the user and preventing duplicate votes
         alert("You have already rated this teacher. Your rating remains unchanged.");
         return; // Exit early to prevent duplicate votes in the ratings array
     }
-
-    // Clear cookie on page load or allow reset for testing (optional, comment out if not needed)
-    // setCookie('votedTeachers', '', -1); // Uncomment to reset cookies for testing
 
     // Reload teacher data to reflect the new rating
     loadTeacher();
