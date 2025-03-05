@@ -179,7 +179,7 @@ app.get('/api/teachers/:id', (req, res) => {
 app.post('/api/ratings', (req, res) => {
     const { teacher_id, rating, review } = req.body;
     const teacherId = parseInt(teacher_id);
-    const newRating = { teacher_id, rating: parseInt(rating), review };
+    const newRating = { teacher_id, rating: parseInt(rating), review: review || '' };
 
     const cookieStr = req.headers.cookie?.split('votedTeachers=')[1]?.split(';')[0] || '';
     const votedArray = cookieStr ? cookieStr.split(',').map(id => id.trim()).filter(Boolean) : [];
@@ -203,16 +203,24 @@ app.post('/api/ratings', (req, res) => {
     res.json({ message: 'Rating submitted!' });
 });
 
-// Update a rating (for admin or user, but here for completeness—kept as is)
+// Update a rating (for admin or user, but here for completeness—fix for user updates)
 app.put('/api/ratings/:teacherId', (req, res) => {
     const teacherId = parseInt(req.params.teacherId);
     const { rating, review } = req.body;
     const voteIndex = ratings.findIndex(r => r.teacher_id === teacherId);
-    if (voteIndex === -1) return res.status(404).json({ error: 'Vote not found' });
-    ratings[voteIndex] = { teacher_id: teacherId, rating: parseInt(rating), review: review || '' };
-    console.log('Server - Updated vote for teacher:', teacherId);
-    console.log('Server - New rating:', rating);
-    res.json({ message: 'Vote updated successfully!' });
+    if (voteIndex === -1) {
+        // If no vote exists, treat it as a new vote (this fixes the error on second vote)
+        ratings.push({ teacher_id: teacherId, rating: parseInt(rating), review: review || '' });
+        console.log('Server - Added new rating for teacher (via PUT):', teacherId);
+        console.log('Server - New rating:', rating);
+        res.json({ message: 'Rating added successfully!' });
+    } else {
+        // Update existing vote
+        ratings[voteIndex] = { teacher_id: teacherId, rating: parseInt(rating), review: review || '' };
+        console.log('Server - Updated vote for teacher:', teacherId);
+        console.log('Server - New rating:', rating);
+        res.json({ message: 'Vote updated successfully!' });
+    }
 });
 
 // Delete a rating (for admin or user update logic)

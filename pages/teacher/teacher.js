@@ -57,7 +57,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ? `${'★'.repeat(Math.round(teacher.avg_rating))}${'☆'.repeat(5 - Math.round(teacher.avg_rating))}`
                 : '☆☆☆☆☆';
             const voteCount = teacher.rating_count || 0;
-            document.getElementById('avg-rating').innerHTML = `${stars} (${voteCount})`;
+            document.getElementById('avg-rating').innerHTML = stars;
+            document.getElementById('vote-count').textContent = voteCount;
+            console.log('LoadTeacher - Displayed rating:', stars, 'Votes:', voteCount);
 
             const table = document.getElementById('teacher-classes');
             table.innerHTML = ''; // Clear existing table
@@ -125,7 +127,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('teacher-title').textContent = `Teacher ID ${teacherId}`;
             document.getElementById('teacher-bio').textContent = 'No bio available due to error.';
             document.getElementById('teacher-summary').textContent = 'No summary available due to error.';
-            document.getElementById('avg-rating').innerHTML = '☆☆☆☆☆ (0)';
+            document.getElementById('avg-rating').innerHTML = '☆☆☆☆☆';
+            document.getElementById('vote-count').textContent = '0';
         }
     }
 
@@ -173,13 +176,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             let hasVoted = votedArray.includes(teacherId.toString());
 
             if (hasVoted) {
-                // Edit existing vote
+                // Update existing vote
                 await fetch(`/api/ratings/${teacherId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ rating: selectedRating, review })
                 });
-                showModal('Your previous vote has been updated.');
+                showModal('Your vote has been updated.');
             } else {
                 // Add new vote
                 votedArray.push(teacherId.toString());
