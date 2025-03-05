@@ -64,7 +64,6 @@ body {
     color: #000000; /* Black text for title */
     margin-bottom: 20px;
     display: block; /* Ensure visibility */
-    outline: 1px dashed red; /* Debugging outline */
 }
 .teacher-content {
     display: flex;
@@ -93,7 +92,6 @@ body {
     height: 250px; /* Increased height to maintain aspect ratio */
     object-fit: contain; /* Maintain aspect ratio, scale down if larger */
     display: block; /* Ensure visibility */
-    outline: 1px dashed red; /* Debugging outline */
 }
 #teacher-bio, #teacher-summary {
     margin: 20px 0;
@@ -101,7 +99,6 @@ body {
     text-align: justify; /* Justify text for paragraph-like appearance */
     display: block; /* Ensure visibility */
     overflow-wrap: break-word; /* Handle long text */
-    outline: 1px dashed red; /* Debugging outline */
 }
 #teacher-summary {
     font-style: italic; /* Italicize summary for distinction */
@@ -112,7 +109,6 @@ body {
     margin: 20px 0;
     width: 100%; /* Ensure table fills right section */
     display: block; /* Ensure visibility */
-    outline: 1px dashed red; /* Debugging outline */
 }
 #teacher-classes td {
     border: 1px solid #00B7D1; /* Teal border for table */
@@ -120,7 +116,6 @@ body {
     width: 120px; /* Adjusted for blocks and schedule layout */
     background-color: #FFFFFF; /* White background for cells */
     display: block; /* Ensure visibility */
-    outline: 1px dashed red; /* Debugging outline */
 }
 #rating-form {
     display: flex;
@@ -172,7 +167,6 @@ button:hover {
 .all-reviews {
     margin-top: 20px;
     display: block; /* Ensure visibility */
-    outline: 1px dashed red; /* Debugging outline */
 }
 .review-entry {
     border: 1px solid #00B7D1; /* Teal border for review entries */
@@ -181,19 +175,16 @@ button:hover {
     background-color: #FFFFFF; /* White background for review entries */
     border-radius: 8px;
     display: block; /* Ensure visibility */
-    outline: 1px dashed red; /* Debugging outline */
 }
 .review-entry p {
     margin: 5px 0;
     color: #000000; /* Black text for reviews */
     display: block; /* Ensure visibility */
-    outline: 1px dashed red; /* Debugging outline */
 }
 .review-entry hr {
     border: 1px solid #00B7D1; /* Teal border for separator */
     margin: 10px 0;
     display: block; /* Ensure visibility */
-    outline: 1px dashed red; /* Debugging outline */
 }
 footer {
     text-align: center;
@@ -418,5 +409,4 @@ footer a:hover {
     z-index: 1002; /* Above header and modal */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
     display: block; /* Ensure visibility */
-    outline: 1px dashed red; /* Debugging outline */
 }
