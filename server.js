@@ -176,7 +176,7 @@ app.get('/api/teachers/:id', (req, res) => {
 });
 
 // Submit or update a rating (edit past vote if already voted)
-app.post('/api/ratings', async (req, res) => {
+app.post('/api/ratings', (req, res) => {
     const { teacher_id, rating, review } = req.body;
     const teacherId = parseInt(teacher_id);
     const newRating = { teacher_id, rating: parseInt(rating), review: review || '' };
@@ -186,14 +186,19 @@ app.post('/api/ratings', async (req, res) => {
 
     if (votedArray.includes(teacherId.toString())) {
         // Edit existing vote using PUT
-        const updateResponse = fetch(`/api/ratings/${teacherId}`, {
+        fetch(`/api/ratings/${teacherId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ rating: parseInt(rating), review: review || '' })
+        }).then(response => {
+            if (!response.ok) throw new Error(`HTTP error updating vote! status: ${response.status}`);
+            console.log('Server - Updated rating for teacher via POST:', teacher_id);
+            console.log('Server - New rating:', rating);
+        }).catch(error => {
+            console.error('Server - Error updating vote:', error.message);
+            res.status(500).json({ error: 'Error updating your rating. Please try again.' });
+            return;
         });
-        if (!updateResponse.ok) throw new Error(`HTTP error updating vote! status: ${updateResponse.status}`);
-        console.log('Server - Updated rating for teacher via POST:', teacher_id);
-        console.log('Server - New rating:', rating);
     } else {
         // Add new vote
         ratings.push(newRating);

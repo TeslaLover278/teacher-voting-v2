@@ -165,9 +165,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch('/api/ratings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ teacher_id: teacherId, rating: selectedRating, review })
+                body: JSON.stringify({ teacher_id: teacherId, rating: selectedRating, review: review || '' })
             });
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status} - ${await response.text()}`);
             const result = await response.json();
             console.log('Vote - Submitted, response:', result.message);
 
@@ -177,11 +177,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (hasVoted) {
                 // Update existing vote
-                await fetch(`/api/ratings/${teacherId}`, {
+                const updateResponse = await fetch(`/api/ratings/${teacherId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ rating: selectedRating, review: review || '' })
                 });
+                if (!updateResponse.ok) throw new Error(`HTTP error updating vote! status: ${updateResponse.status} - ${await updateResponse.text()}`);
                 showModal('Your vote has been updated.');
             } else {
                 // Add new vote
