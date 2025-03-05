@@ -3,6 +3,8 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    background-color: #E6F0F8; /* Light gray-blue background from logo */
+    color: #000000; /* Black text for readability */
 }
 .controls {
     margin-bottom: 20px;
@@ -12,6 +14,9 @@ body {
 #search-bar, #sort-select {
     padding: 5px;
     font-size: 16px;
+    border: 1px solid #00B7D1; /* Teal border from logo */
+    border-radius: 4px;
+    background-color: #FFFFFF; /* White background for inputs */
 }
 #teacher-grid {
     display: grid;
@@ -21,6 +26,11 @@ body {
 .teacher-card {
     text-align: center;
     cursor: pointer;
+    background-color: #FFFFFF; /* White background for cards */
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #00B7D1; /* Teal border for cards */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .teacher-card img {
     width: 150px;
@@ -31,7 +41,7 @@ body {
     font-size: 20px;
 }
 .stars.grey {
-    color: #ccc;
+    color: #ADB5BD; /* Gray for unrated stars */
 }
 .teacher-header {
     display: flex;
@@ -44,21 +54,27 @@ body {
 }
 #teacher-bio {
     margin: 20px 0;
+    color: #000000; /* Black text for bio */
 }
 #teacher-classes {
     border-collapse: collapse;
     margin: 20px 0;
 }
 #teacher-classes td {
-    border: 1px solid #ccc;
+    border: 1px solid #00B7D1; /* Teal border for table */
     padding: 10px;
     width: 120px; /* Adjusted for 2x4 layout */
+    background-color: #FFFFFF; /* White background for cells */
 }
 #rating-form {
     display: flex;
     flex-direction: column;
     gap: 10px;
     max-width: 400px;
+    background-color: #FFFFFF; /* White background for form */
+    padding: 15px;
+    border: 1px solid #00B7D1; /* Teal border for form */
+    border-radius: 8px;
 }
 #star-rating {
     font-size: 24px;
@@ -66,36 +82,49 @@ body {
 }
 #star-rating .star:hover,
 #star-rating .star.selected {
-    color: gold;
+    color: #00B7D1; /* Teal for selected stars */
 }
 textarea {
     padding: 5px;
     height: 100px;
+    border: 1px solid #00B7D1; /* Teal border for textarea */
+    border-radius: 4px;
+    background-color: #FFFFFF; /* White background for textarea */
 }
 button {
     padding: 10px;
-    background-color: #007bff;
-    color: white;
+    background-color: #00B7D1; /* Teal for buttons */
+    color: #FFFFFF; /* White text */
     border: none;
     cursor: pointer;
+    border-radius: 4px;
 }
 button:hover {
-    background-color: #0056b3;
+    background-color: #0078D4; /* Blue for hover state */
 }
 #reviews div {
-    border: 1px solid #ccc;
+    border: 1px solid #00B7D1; /* Teal border for reviews */
     padding: 10px;
     margin-bottom: 10px;
+    background-color: #FFFFFF; /* White background for reviews */
 }
 #home-button {
     margin-bottom: 20px;
     padding: 10px 20px;
+    background-color: #00B7D1; /* Teal for home button */
+    color: #FFFFFF; /* White text */
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+#home-button:hover {
+    background-color: #0078D4; /* Blue for hover state */
 }
 #reviews a {
     margin-right: 10px;
     text-decoration: underline;
-    color: #007bff;
+    color: #00B7D1; /* Teal for links */
 }
 #reviews a:hover {
-    color: #0056b3;
+    color: #0078D4; /* Blue for hover state */
 }

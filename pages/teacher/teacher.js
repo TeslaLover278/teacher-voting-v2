@@ -28,8 +28,8 @@ async function loadTeacher() {
         reviewsDiv.appendChild(div);
     });
 
-    const votedTeachers = getCookie('votedTeachers').split(',').filter(Boolean);
-    if (votedTeachers.includes(teacherId)) {
+    const votedTeachers = getCookie('votedTeachers') ? getCookie('votedTeachers').split(',').filter(Boolean) : [];
+    if (votedTeachers.includes(teacherId.toString())) {
         document.getElementById('rating-form').style.display = 'none';
         document.getElementById('rating-heading').style.display = 'none'; // Hide "Your Rating" heading
     }
@@ -80,12 +80,19 @@ document.getElementById('rating-form').addEventListener('submit', async (e) => {
         document.getElementById('reviews').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // Update cookie to allow voting on other teachers
-    const votedTeachers = getCookie('votedTeachers').split(',').filter(Boolean);
-    if (!votedTeachers.includes(teacherId)) {
-        votedTeachers.push(teacherId);
+    // Update cookie to track only this teacher's vote, allowing voting on others
+    const votedTeachers = getCookie('votedTeachers') ? getCookie('votedTeachers').split(',').filter(Boolean) : [];
+    if (!votedTeachers.includes(teacherId.toString())) {
+        votedTeachers.push(teacherId.toString());
         setCookie('votedTeachers', votedTeachers.join(','), 365);
+    } else {
+        // Allow re-voting or clarify the user has already voted for this teacher
+        alert("You have already rated this teacher. Your rating remains unchanged.");
+        return; // Exit early to prevent duplicate votes in the ratings array
     }
+
+    // Reload teacher data to reflect the new rating
+    loadTeacher();
 
     // Hide rating form and heading after voting
     document.getElementById('rating-form').style.display = 'none';
