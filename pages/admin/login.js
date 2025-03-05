@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('password').value;
 
         try {
+            console.log('Client - Attempting admin login with:', { username });
             const response = await fetch('/api/admin/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -14,14 +15,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 const data = await response.json();
                 localStorage.setItem('adminToken', data.token);
+                console.log('Client - Login successful, redirecting to dashboard');
                 window.location.href = '/admin/dashboard.html';
             } else {
-                alert('Invalid credentials');
+                const errorText = await response.text();
+                console.error('Client - Login failed:', errorText);
+                alert('Invalid credentials. Please try again.');
             }
         } catch (error) {
-            console.error('Login error:', error);
-            alert('Error logging in. Please try again.');
+            console.error('Client - Login error:', error.message, error.stack);
+            alert('Error logging in. Please check your connection and try again.');
         }
     });
-    // Version 1.15
 });

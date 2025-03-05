@@ -2,13 +2,21 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(express.static('public'));
-app.use('/home', express.static('pages/home'));
-app.use('/teacher', express.static('pages/teacher'));
-app.use('/admin', express.static('pages/admin'));
+console.log('Server - Starting initialization...');
+
+// Serve static files asynchronously
+app.use(express.static('public', { maxAge: '1d' }), (req, res, next) => {
+    console.log('Server - Serving static file for:', req.path);
+    next();
+});
+app.use('/home', express.static('pages/home', { maxAge: '1d' }));
+app.use('/teacher', express.static('pages/teacher', { maxAge: '1d' }));
+app.use('/admin', express.static('pages/admin', { maxAge: '1d' }));
 app.use(express.json());
 
-// In-memory database for teachers (expanded with detailed bios and classes from Version 1.14.6)
+console.log('Server - Middleware configured...');
+
+// In-memory database for teachers (expanded with detailed bios and classes from Version 1.14.7)
 const teachers = [
     { 
         id: 1, 
@@ -69,7 +77,7 @@ const ADMIN_CREDENTIALS = { username: 'admin', password: 'password123' };
 function authenticateAdmin(req, res, next) {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token || token !== 'admin-token') {
-        return res.status(401).json({ error: 'Unauthorized' });
+        return res.status(401).json({ error: 'Unauthorized access. Please log in as an admin.' });
     }
     next();
 }
@@ -79,10 +87,13 @@ app.post('/api/admin/login', (req, res) => {
     console.log('Server - Admin login attempt for:', req.body.username);
     console.log('Server - Credentials match:', req.body.username === ADMIN_CREDENTIALS.username && req.body.password === ADMIN_CREDENTIALS.password);
     const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password are required.' });
+    }
     if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
         res.json({ token: 'admin-token' });
     } else {
-        res.status(401).json({ error: 'Invalid credentials' });
+        res.status(401).json({ error: 'Invalid credentials. Please try again.' });
     }
 });
 
@@ -97,11 +108,13 @@ app.get('/api/admin/votes', authenticateAdmin, (req, res) => {
 app.put('/api/admin/votes/:teacherId', authenticateAdmin, (req, res) => {
     const teacherId = parseInt(req.params.teacherId);
     const { rating, review } = req.body;
+    if (!rating || isNaN(rating) || rating < 1 || rating > 5) {
+        return res.status(400).json({ error: 'Rating must be a number between 1 and 5.' });
+    }
     const voteIndex = ratings.findIndex(r => r.teacher_id === teacherId);
-    if (voteIndex === -1) return res.status(404).json({ error: 'Vote not found' });
+    if (voteIndex === -1) return res.status(404).json({ error: 'Vote not found for this teacher.' });
     ratings[voteIndex] = { teacher_id: teacherId, rating: parseInt(rating), review: review || '' };
-    console.log('Server - Modified vote for teacher:', teacherId);
-    console.log('Server - New rating:', rating);
+    console.log('Server - Modified vote for teacher:', teacherId, 'New rating:', rating);
     res.json({ message: 'Vote modified successfully!' });
 });
 
@@ -115,11 +128,11 @@ app.delete('/api/admin/votes/:teacherId', authenticateAdmin, (req, res) => {
         console.log('Server - Votes remaining:', ratings.length);
         res.json({ message: 'Vote deleted successfully!' });
     } else {
-        res.status(404).json({ error: 'Vote not found' });
+        res.status(404).json({ error: 'No vote found for this teacher.' });
     }
 });
 
-// Get all teachers with average ratings and sorting options (from working logic, expanded with ratings)
+// Get all teachers with average ratings and sorting options
 app.get('/api/teachers', (req, res) => {
     let teachersWithRatings = teachers.map(teacher => {
         const teacherRatings = ratings.filter(r => r.teacher_id === teacher.id);
@@ -129,7 +142,7 @@ app.get('/api/teachers', (req, res) => {
         return { ...teacher, avg_rating: avgRating, rating_count: teacherRatings.length };
     });
 
-    // Apply sorting based on query parameter (from working logic)
+    // Apply sorting based on query parameter
     const sortBy = req.query.sort || 'default';
     switch (sortBy) {
         case 'alphabetical':
@@ -144,7 +157,7 @@ app.get('/api/teachers', (req, res) => {
             break;
     }
 
-    // Apply search filter based on query parameter (from working logic)
+    // Apply search filter based on query parameter
     const searchQuery = req.query.search || '';
     if (searchQuery) {
         teachersWithRatings = teachersWithRatings.filter(t => 
@@ -152,31 +165,32 @@ app.get('/api/teachers', (req, res) => {
         );
     }
 
-    console.log('Server - Fetched teachers:', teachersWithRatings.length);
-    console.log('Server - Sort/Search applied:', sortBy, searchQuery);
+    console.log('Server - Fetched teachers:', teachersWithRatings.length, 'Sort/Search:', { sortBy, searchQuery });
     res.json(teachersWithRatings);
 });
 
-// Get a single teacher by ID with ratings (from working logic, expanded with ratings)
+// Get a single teacher by ID with ratings
 app.get('/api/teachers/:id', (req, res) => {
     const id = parseInt(req.params.id);
     const teacher = teachers.find(t => t.id === id);
-    if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
+    if (!teacher) return res.status(404).json({ error: 'Teacher not found.' });
     
     const teacherRatings = ratings.filter(r => r.teacher_id === id);
     const avgRating = teacherRatings.length
         ? teacherRatings.reduce((sum, r) => sum + r.rating, 0) / teacherRatings.length
         : null;
-    console.log('Server - Fetched teacher ID:', id);
-    console.log('Server - Avg rating:', avgRating, 'Ratings count:', teacherRatings.length, 'Raw ratings:', teacherRatings);
+    console.log('Server - Fetched teacher ID:', id, 'Avg rating:', avgRating, 'Ratings count:', teacherRatings.length);
     res.json({ ...teacher, avg_rating: avgRating, ratings: teacherRatings });
 });
 
-// Submit a rating (from working logic, with single vote enforcement from Version 1.14.6)
+// Submit a rating (with single vote enforcement)
 app.post('/api/ratings', (req, res) => {
     const { teacher_id, rating, review } = req.body;
-    const teacherId = parseInt(teacher_id);
+    if (!teacher_id || isNaN(teacher_id) || !rating || isNaN(rating) || rating < 1 || rating > 5) {
+        return res.status(400).json({ error: 'Invalid teacher ID or rating. Rating must be a number between 1 and 5.' });
+    }
 
+    const teacherId = parseInt(teacher_id);
     const cookieStr = req.headers.cookie?.split('votedTeachers=')[1]?.split(';')[0] || '';
     const votedArray = cookieStr ? cookieStr.split(',').map(id => parseInt(id.trim())).filter(Boolean) : [];
 
@@ -188,53 +202,57 @@ app.post('/api/ratings', (req, res) => {
     ratings.push({ teacher_id: teacherId, rating: parseInt(rating), review: review || '' });
     votedArray.push(teacherId);
     setCookie(res, 'votedTeachers', votedArray.join(','), 365);
-    console.log('Server - Added rating for teacher:', teacher_id, 'Rating:', { teacher_id, rating, review });
+    console.log('Server - Added rating for teacher:', teacherId, 'Rating:', { rating, review });
     console.log('Server - Ratings total:', ratings.length, 'Updated ratings:', ratings);
 
     res.json({ message: 'Rating submitted!' });
 });
 
-// Add a new teacher (from working logic, with admin restriction from Version 1.14.6)
+// Add a new teacher (admin-only)
 app.post('/api/teachers', authenticateAdmin, (req, res) => {
     const { name, bio, classes } = req.body;
+    if (!name || !bio || !classes || !Array.isArray(classes)) {
+        return res.status(400).json({ error: 'Name, bio, and classes (as an array) are required.' });
+    }
     const newTeacher = {
         id: teachers.length ? Math.max(...teachers.map(t => t.id)) + 1 : 1,
         name,
         bio,
-        classes: classes || []
+        classes
     };
     teachers.push(newTeacher);
-    console.log('Server - Added new teacher:', newTeacher.name);
-    console.log('Server - New teacher ID:', newTeacher.id);
+    console.log('Server - Added new teacher:', newTeacher.name, 'ID:', newTeacher.id);
     res.json(newTeacher);
 });
 
-// Delete a teacher and their votes (from Version 1.14.6, admin-only)
+// Delete a teacher and their votes (admin-only)
 app.delete('/api/admin/teachers/:id', authenticateAdmin, (req, res) => {
     const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid teacher ID.' });
     const initialTeacherLength = teachers.length;
     teachers = teachers.filter(t => t.id !== id);
     if (teachers.length < initialTeacherLength) {
         ratings = ratings.filter(r => r.teacher_id !== id); // Remove all votes for this teacher
-        console.log('Server - Deleted teacher ID:', id);
-        console.log('Server - Teachers remaining:', teachers.length);
+        console.log('Server - Deleted teacher ID:', id, 'Teachers remaining:', teachers.length);
         res.json({ message: 'Teacher and their votes deleted successfully!' });
     } else {
-        res.status(404).json({ error: 'Teacher not found' });
+        res.status(404).json({ error: 'Teacher not found.' });
     }
 });
 
 app.get('/', (req, res) => {
+    console.log('Server - Redirecting to home page...');
     res.sendFile('index.html', { root: 'pages/home' });
+});
+
+console.log('Server - Starting server on port', port);
+app.listen(port, () => {
+    console.log(`Server running on port ${port} - Version 1.15 - Started at ${new Date().toISOString()}`);
 });
 
 // Helper function to set cookies in the response
 function setCookie(res, name, value, days) {
     const date = new Date();
     date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    res.setHeader('Set-Cookie', `${name}=${value}; Expires=${date.toUTCString()}; Path=/`);
+    res.setHeader('Set-Cookie', `${name}=${value}; Expires=${date.toUTCString()}; Path=/; SameSite=Strict`);
 }
-
-app.listen(port, () => {
-    console.log(`Server running on port ${port} - Version 1.15`);
-});

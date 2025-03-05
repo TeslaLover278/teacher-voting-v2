@@ -34,15 +34,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             const teacher = await response.json();
             
-            console.log('LoadTeacher - Fetched data for teacher', teacherId);
-            console.log('LoadTeacher - Avg rating:', teacher.avg_rating || 'No ratings', 'Votes:', teacher.rating_count, 'Raw ratings:', teacher.ratings);
+            console.log('Client - Fetched data for teacher', teacherId);
+            console.log('Client - Avg rating:', teacher.avg_rating || 'No ratings', 'Votes:', teacher.rating_count, 'Raw ratings:', teacher.ratings);
 
             // Use a local file path for the teacher photo based on teacher ID, with fallback
             const teacherPhotoPath = `/images/teacher${teacher.id}.jpg`;
             const img = document.getElementById('teacher-photo');
             img.src = teacherPhotoPath;
             img.onerror = () => {
-                console.error('LoadTeacher - Image load error for:', teacherPhotoPath);
+                console.error('Client - Image load error for:', teacherPhotoPath);
                 img.src = '/images/default-teacher.jpg'; // Fallback image if teacher photo fails
                 img.alt = `Default image for ${teacher.name}`; // Update alt text for accessibility
             };
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const voteCount = teacher.rating_count || 0;
             document.getElementById('avg-rating').innerHTML = stars;
             document.getElementById('vote-count').textContent = voteCount;
-            console.log('LoadTeacher - Displayed rating:', stars, 'Votes:', voteCount);
+            console.log('Client - Displayed rating:', stars, 'Votes:', voteCount);
 
             const table = document.getElementById('teacher-classes');
             table.innerHTML = ''; // Clear existing table
@@ -99,19 +99,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ratingForm.style.display = 'none'; // Hide form if already voted
                 ratingHeading.style.display = 'none';
                 voteMessage.style.display = 'block'; // Show message indicating they’ve already voted
-                console.log('Vote - User has already voted for teacher', teacherId);
+                console.log('Client - User has already voted for teacher', teacherId);
             } else {
                 ratingForm.style.display = 'block';
                 ratingHeading.style.display = 'block';
                 voteMessage.style.display = 'none';
-                console.log('Vote - Form shown for new vote for teacher', teacherId);
+                console.log('Client - Form shown for new vote for teacher', teacherId);
             }
 
             document.querySelector('.logo').addEventListener('click', () => {
                 window.location.href = '/';
             });
         } catch (error) {
-            console.error('LoadTeacher - Error:', error.message);
+            console.error('Client - Error loading teacher:', error.message);
             // Only show modal and set error messages for critical HTTP errors
             if (error.message.includes('HTTP error')) {
                 showModal('Error loading teacher data. Please try again.');
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const img = document.getElementById('teacher-photo');
             img.src = `/images/teacher${teacherId}.jpg`;
             img.onerror = () => {
-                console.error('LoadTeacher - Fallback image load error for:', teacherId);
+                console.error('Client - Fallback image load error for:', teacherId);
                 img.src = '/images/default-teacher.jpg';
                 img.alt = `Default image for teacher ID ${teacherId}`; // Update alt text
             };
@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            console.log('Vote - Submitting for teacher', teacherId);
+            console.log('Client - Submitting vote for teacher', teacherId);
             const response = await fetch('/api/ratings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
             }
             const result = await response.json();
-            console.log('Vote - Submitted, response:', result.message);
+            console.log('Client - Vote submitted, response:', result.message);
 
             // Hide the form and show the message after voting
             const ratingForm = document.getElementById('rating-form');
@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Reload teacher data to update ratings
             await loadTeacher();
         } catch (error) {
-            console.error('Vote - Error:', error.message, error.stack); // Added stack trace for debugging
+            console.error('Client - Error submitting vote:', error.message, error.stack);
             if (error.message.includes('HTTP error')) {
                 showModal('Error submitting your rating. Please try again.');
             }
@@ -201,20 +201,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function clearVotesForTesting() {
         setCookie('votedTeachers', '', -1);
-        console.log('Vote - Cookies cleared for testing');
+        console.log('Client - Cookies cleared for testing');
     }
 
     // Uncomment below in browser console for testing
     // clearVotesForTesting();
 
-    await loadTeacher().catch(error => console.error('LoadTeacher - Initial load error:', error.message, error.stack));
-    // Version 1.15
+    await loadTeacher().catch(error => console.error('Client - Initial load error:', error.message, error.stack));
 });
 
 function setCookie(name, value, days) {
     const date = new Date();
     date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+    document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/; SameSite=Strict`;
 }
 function getCookie(name) {
     const value = `; ${document.cookie}`;

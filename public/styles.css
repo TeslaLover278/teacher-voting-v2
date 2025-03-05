@@ -266,20 +266,6 @@ body {
     color: #0078D4; /* Blue for hover state */
 }
 
-.notification {
-    display: none;
-    position: fixed;
-    top: 80px; /* Below the header */
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 10px 20px;
-    background-color: #00B7D1; /* Teal background */
-    color: #FFFFFF; /* White text */
-    border-radius: 4px;
-    z-index: 1002; /* Above header and modal */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-}
-
 /* Modal styles */
 .modal {
     display: none;
@@ -319,4 +305,21 @@ body {
     background-color: #0078D4; /* Blue for hover state */
 }
 
-/* Version 1.15 */
+/* Notification styles */
+.notification {
+    display: none;
+    position: fixed;
+    top: 80px; /* Below the header */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    background-color: #00B7D1; /* Teal background */
+    color: #FFFFFF; /* White text */
+    border-radius: 4px;
+    z-index: 1002; /* Above header and modal */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+}
+.error-message {
+    color: #DC3545; /* Red for error messages */
+    text-align: center;
+}

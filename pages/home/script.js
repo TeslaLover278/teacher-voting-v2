@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadTeachers(sort = 'default', search = '') {
         try {
             const response = await fetch(`/api/teachers?sort=${sort}&search=${encodeURIComponent(search)}`);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
             const teachers = await response.json();
 
             teacherGrid.innerHTML = '';
@@ -23,8 +23,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.addEventListener('click', () => window.location.href = `/teacher/teacher.html?id=${teacher.id}`);
                 teacherGrid.appendChild(card);
             });
+            console.log('Client - Loaded teachers:', teachers.length, 'Sort/Search:', { sort, search });
         } catch (error) {
-            console.error('Error loading teachers:', error.message);
+            console.error('Client - Error loading teachers:', error.message);
+            teacherGrid.innerHTML = '<p class="error-message">Error loading teachers. Please try again later.</p>';
         }
     }
 
@@ -36,6 +38,5 @@ document.addEventListener('DOMContentLoaded', () => {
         loadTeachers(sortSelect.value, searchBar.value);
     });
 
-    loadTeachers();
-    // Version 1.15
+    loadTeachers().catch(error => console.error('Client - Initial load error:', error.message));
 });
