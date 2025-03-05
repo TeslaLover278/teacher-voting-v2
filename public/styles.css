@@ -18,11 +18,17 @@ body {
 .logo:hover {
     opacity: 0.8;
 }
+.page-title {
+    margin-left: 120px; /* Shift right to avoid logo overlap (adjust based on logo size) */
+    margin-top: 20px; /* Align with logo vertically */
+    font-size: 2em; /* Maintain or adjust size as needed */
+    color: #000000; /* Black text */
+}
 .controls {
     margin-bottom: 20px;
     display: flex;
     gap: 10px;
-    margin-top: 120px; /* Adjust to avoid overlap with logo */
+    margin-top: 80px; /* Reduced to account for title positioning, adjust if needed */
 }
 #search-bar, #sort-select {
     padding: 5px;

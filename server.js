@@ -19,7 +19,7 @@ const teachers = [
     { id: 8, name: "Mrs. Agustin", bio: "Tech innovator.", classes: ["Coding", "Robotics", "Web Design", "AI Basics", "Game Dev", "Cybersecurity", "Data Science", "Mobile App Dev"] }
 ];
 
-const ratings = []; // In-memory ratings persist during runtime
+const ratings = []; // In-memory ratings persist during runtime for all users
 
 // Get all teachers with average ratings and sorting options
 app.get('/api/teachers', (req, res) => {
