@@ -32,12 +32,36 @@
         </div>
         <button id="logout-btn" class="admin-btn logout-btn">Logout</button>
     </div>
+
+    <!-- Modal for on-page popups -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <p id="modal-message"></p>
+            <button id="modal-close" class="modal-btn">OK</button>
+        </div>
+    </div>
+
     <script>
         const token = localStorage.getItem('adminToken');
         if (!token) {
             window.location.href = '/admin/login.html';
             return;
         }
+
+        // Modal functions
+        function showModal(message) {
+            const modal = document.getElementById('modal');
+            const modalMessage = document.getElementById('modal-message');
+            modalMessage.textContent = message;
+            modal.style.display = 'block';
+        }
+
+        function hideModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'none';
+        }
+
+        document.getElementById('modal-close').addEventListener('click', hideModal);
 
         async function loadVotes() {
             try {
@@ -57,7 +81,7 @@
                     </div>
                 `).join('');
             } catch (error) {
-                alert('Error loading votes. Please try again.');
+                showModal('Error loading votes. Please try again.');
                 console.error('Admin Dashboard - Error:', error);
             }
         }
@@ -79,7 +103,7 @@
                     </div>
                 `).join('');
             } catch (error) {
-                alert('Error loading teachers. Please try again.');
+                showModal('Error loading teachers. Please try again.');
                 console.error('Admin Dashboard - Error:', error);
             }
         }
@@ -99,13 +123,13 @@
                     });
                     if (!response.ok) throw new Error('Failed to modify vote');
                     loadVotes();
-                    alert('Vote modified successfully!');
+                    showModal('Vote modified successfully!');
                 } catch (error) {
-                    alert('Error modifying vote. Please try again.');
+                    showModal('Error modifying vote. Please try again.');
                     console.error('Admin Dashboard - Modify Error:', error);
                 }
             } else {
-                alert('Invalid rating. Please enter a number between 1 and 5.');
+                showModal('Invalid rating. Please enter a number between 1 and 5.');
             }
         }
 
@@ -118,9 +142,9 @@
                     });
                     if (!response.ok) throw new Error('Failed to delete vote');
                     loadVotes();
-                    alert('Vote deleted successfully!');
+                    showModal('Vote deleted successfully!');
                 } catch (error) {
-                    alert('Error deleting vote. Please try again.');
+                    showModal('Error deleting vote. Please try again.');
                     console.error('Admin Dashboard - Delete Error:', error);
                 }
             }
@@ -136,9 +160,9 @@
                     if (!response.ok) throw new Error('Failed to delete teacher');
                     loadTeachers();
                     loadVotes(); // Refresh votes to remove any associated with this teacher
-                    alert('Teacher and their votes deleted successfully!');
+                    showModal('Teacher and their votes deleted successfully!');
                 } catch (error) {
-                    alert('Error deleting teacher. Please try again.');
+                    showModal('Error deleting teacher. Please try again.');
                     console.error('Admin Dashboard - Delete Teacher Error:', error);
                 }
             }
@@ -164,10 +188,10 @@
                 if (!response.ok) throw new Error('Failed to add teacher');
                 const result = await response.json();
                 loadTeachers();
-                alert('Teacher added successfully!');
+                showModal('Teacher added successfully!');
                 e.target.reset();
             } catch (error) {
-                alert('Error adding teacher. Please try again.');
+                showModal('Error adding teacher. Please try again.');
                 console.error('Admin Dashboard - Add Teacher Error:', error);
             }
         });

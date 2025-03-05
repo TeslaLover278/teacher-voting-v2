@@ -2,6 +2,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const teacherId = urlParams.get('id');
 
+    // Modal functions
+    function showModal(message) {
+        const modal = document.getElementById('modal');
+        const modalMessage = document.getElementById('modal-message');
+        modalMessage.textContent = message;
+        modal.style.display = 'block';
+    }
+
+    function hideModal() {
+        const modal = document.getElementById('modal');
+        modal.style.display = 'none';
+    }
+
+    document.getElementById('modal-close').addEventListener('click', hideModal);
+
     async function loadTeacher() {
         try {
             const response = await fetch(`/api/teachers/${teacherId}`);
@@ -20,6 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             img.onerror = () => {
                 console.error('LoadTeacher - Image load error for:', teacherPhotoPath);
                 img.src = '/images/default-teacher.jpg'; // Fallback image if teacher photo fails
+                img.alt = `Default image for ${teacher.name}`; // Update alt text for accessibility
             };
 
             document.getElementById('teacher-name').textContent = teacher.name;
@@ -74,22 +90,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         } catch (error) {
             console.error('LoadTeacher - Error:', error.message);
+            // Only show modal for critical HTTP errors, not image load failures
             if (error.message.includes('HTTP error')) {
-                alert('Error loading teacher data. Please try again.');
+                showModal('Error loading teacher data. Please try again.');
             } else {
-                alert('An unexpected error occurred. Please try refreshing the page.');
+                // Log non-HTTP errors but don’t show modal unless critical
+                showModal('An unexpected error occurred. Please try refreshing the page.');
             }
             const ratingForm = document.getElementById('rating-form');
             const ratingHeading = document.getElementById('rating-heading');
             ratingForm.style.display = 'block';
             ratingHeading.style.display = 'block';
-            // Ensure photo loads with fallback even if fetch fails
+            // Attempt to load photo with fallback even if fetch fails
             const img = document.getElementById('teacher-photo');
             img.src = `/images/teacher${teacherId}.jpg`;
             img.onerror = () => {
                 console.error('LoadTeacher - Fallback image load error for:', teacherId);
                 img.src = '/images/default-teacher.jpg';
+                img.alt = `Default image for teacher ID ${teacherId}`; // Update alt text
             };
+            // Set default name and bio if fetch fails
+            document.getElementById('teacher-name').textContent = `Teacher ID ${teacherId}`;
+            document.getElementById('teacher-bio').textContent = 'No bio available due to error.';
         }
     }
 
@@ -115,7 +137,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('rating-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (!selectedRating) return alert('Please select a rating!');
+        if (!selectedRating) {
+            showModal('Please select a rating!');
+            return;
+        }
         const review = document.getElementById('review').value;
 
         try {
@@ -148,14 +173,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             await loadTeacher();
             document.getElementById('rating-form').style.display = 'none';
             document.getElementById('rating-heading').style.display = 'none';
+            showModal('Rating submitted successfully!');
         } catch (error) {
             console.error('Vote - Error:', error.message);
             if (error.message === 'Duplicate vote detected') {
-                alert("You have already rated this teacher. Your rating remains unchanged.");
+                showModal("You have already rated this teacher. Your rating remains unchanged.");
             } else if (error.message.includes('HTTP error')) {
-                alert('Error submitting your rating. Please try again.');
+                showModal('Error submitting your rating. Please try again.');
             } else {
-                alert('An unexpected error occurred while submitting your rating. Please try again.');
+                showModal('An unexpected error occurred while submitting your rating. Please try again.');
             }
         }
     });
