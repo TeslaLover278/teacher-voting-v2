@@ -14,17 +14,17 @@
     </header>
     <div id="notification" class="notification"></div>
     <div id="teacher-profile" class="teacher-profile-container">
-        <h2 id="teacher-title"></h2>
+        <h2 id="teacher-title" data-debug="teacher-title"></h2>
         <div class="teacher-content">
             <div class="teacher-left">
                 <div class="teacher-header">
-                    <img id="teacher-photo" src="" alt="Teacher Photo">
+                    <img id="teacher-photo" src="" alt="Teacher Photo" data-debug="teacher-photo">
                 </div>
-                <p id="teacher-bio"></p>
-                <p id="teacher-summary"></p>
+                <p id="teacher-bio" data-debug="teacher-bio"></p>
+                <p id="teacher-summary" data-debug="teacher-summary"></p>
             </div>
             <div class="teacher-right">
-                <table id="teacher-classes"></table>
+                <table id="teacher-classes" data-debug="teacher-classes"></table>
                 <h3 id="rating-heading">Your Rating</h3>
                 <form id="rating-form">
                     <div id="star-rating"></div>
@@ -32,9 +32,9 @@
                     <button type="submit">Submit Rating</button>
                 </form>
                 <h3>Average Rating: <span id="avg-rating"></span></h3>
-                <div id="reviews">
+                <div id="reviews" data-debug="reviews">
                     <p><a href="#reviews" id="read-reviews-link">Read Reviews</a> | <a href="/" id="back-home-link">Back to Main Page</a></p>
-                    <div id="all-reviews" class="all-reviews"></div>
+                    <div id="all-reviews" class="all-reviews" data-debug="all-reviews"></div>
                 </div>
             </div>
         </div>
