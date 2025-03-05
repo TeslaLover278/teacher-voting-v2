@@ -9,17 +9,17 @@ app.use(express.json());
 
 // In-memory database for teachers (easily editable)
 const teachers = [
-    { id: 1, name: "Mrs. Emerson", bio: "Passionate about literature.", classes: ["English 9", "English 10", "Creative Writing", "Poetry", "Drama", "Lit Analysis"] },
-    { id: 2, name: "Mrs. Hewitt", bio: "Math expert with a smile.", classes: ["Algebra", "Geometry", "Calculus", "Stats", "Trig", "Pre-Calc"] },
-    { id: 3, name: "Mrs. Neary", bio: "Science made fun.", classes: ["Biology", "Chemistry", "Physics", "Earth Science", "Botany", "Zoology"] },
-    { id: 4, name: "Mrs. Smith", bio: "History comes alive.", classes: ["World History", "US History", "Civics", "Economics", "Geography", "Anthropology"] },
-    { id: 5, name: "Mr. Kalder", bio: "Artistic visionary.", classes: ["Drawing", "Painting", "Sculpture", "Art History", "Design", "Photography"] },
-    { id: 6, name: "Mr. V", bio: "Music maestro.", classes: ["Band", "Choir", "Music Theory", "Orchestra", "Jazz", "Composition"] },
-    { id: 7, name: "Mr. Gabel", bio: "PE enthusiast.", classes: ["Gym", "Health", "Sports", "Yoga", "Nutrition", "Fitness"] },
-    { id: 8, name: "Mrs. Agustin", bio: "Tech innovator.", classes: ["Coding", "Robotics", "Web Design", "AI Basics", "Game Dev", "Cybersecurity"] }
+    { id: 1, name: "Mrs. Emerson", bio: "Passionate about literature.", classes: ["English 9", "English 10", "Creative Writing", "Poetry", "Drama", "Lit Analysis", "Literature", "Writing Workshop"] },
+    { id: 2, name: "Mrs. Hewitt", bio: "Math expert with a smile.", classes: ["Algebra", "Geometry", "Calculus", "Stats", "Trig", "Pre-Calc", "Math Lab", "Advanced Math"] },
+    { id: 3, name: "Mrs. Neary", bio: "Science made fun.", classes: ["Biology", "Chemistry", "Physics", "Earth Science", "Botany", "Zoology", "Astronomy", "Environmental Science"] },
+    { id: 4, name: "Mrs. Smith", bio: "History comes alive.", classes: ["World History", "US History", "Civics", "Economics", "Geography", "Anthropology", "European History", "Modern History"] },
+    { id: 5, name: "Mr. Kalder", bio: "Artistic visionary.", classes: ["Drawing", "Painting", "Sculpture", "Art History", "Design", "Photography", "Digital Art", "Ceramics"] },
+    { id: 6, name: "Mr. V", bio: "Music maestro.", classes: ["Band", "Choir", "Music Theory", "Orchestra", "Jazz", "Composition", "Music Production", "Vocal Training"] },
+    { id: 7, name: "Mr. Gabel", bio: "PE enthusiast.", classes: ["Gym", "Health", "Sports", "Yoga", "Nutrition", "Fitness", "Team Sports", "Outdoor Education"] },
+    { id: 8, name: "Mrs. Agustin", bio: "Tech innovator.", classes: ["Coding", "Robotics", "Web Design", "AI Basics", "Game Dev", "Cybersecurity", "Data Science", "Mobile App Dev"] }
 ];
 
-const ratings = [];
+const ratings = []; // In-memory ratings persist during runtime
 
 // Get all teachers with average ratings and sorting options
 app.get('/api/teachers', (req, res) => {

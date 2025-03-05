@@ -11,11 +11,13 @@ async function loadTeacher() {
     document.getElementById('avg-rating').textContent = avgStars;
 
     const table = document.getElementById('teacher-classes');
+    // Update to 2x4 table (8 classes max, 4 per row, 2 rows)
     for (let i = 0; i < 2; i++) {
         const row = table.insertRow();
-        for (let j = 0; j < 3; j++) {
+        for (let j = 0; j < 4; j++) {
             const cell = row.insertCell();
-            cell.textContent = teacher.classes[i * 3 + j] || '';
+            const classIndex = i * 4 + j;
+            cell.textContent = teacher.classes[classIndex] || '';
         }
     }
 
@@ -69,21 +71,16 @@ document.getElementById('rating-form').addEventListener('submit', async (e) => {
     });
     const result = await response.json();
 
-    // Show popup instead of alert
-    const popup = document.getElementById('vote-popup');
-    popup.style.display = 'block';
-
-    document.getElementById('read-reviews').addEventListener('click', () => {
-        popup.style.display = 'none';
-        // Scroll to reviews or keep on page (no action needed here as reviews are already visible)
-    });
-
-    document.getElementById('back-home').addEventListener('click', () => {
-        popup.style.display = 'none';
+    // Use native alert instead of popup
+    const choice = confirm("Thank you for your rating! Would you like to stay on this page to read reviews, or return to the main page?");
+    if (!choice) {
         window.location.href = '/';
-    });
+    } else {
+        // Stay on page, scroll to reviews
+        document.getElementById('reviews').scrollIntoView({ behavior: 'smooth' });
+    }
 
-    // Update cookie
+    // Update cookie to allow voting on other teachers
     const votedTeachers = getCookie('votedTeachers').split(',').filter(Boolean);
     if (!votedTeachers.includes(teacherId)) {
         votedTeachers.push(teacherId);
