@@ -105,9 +105,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         } catch (error) {
             console.error('LoadTeacher - Error:', error.message);
-            // Only show modal for critical HTTP errors, not image load failures or data parsing
+            // Only show modal and set error messages for critical HTTP errors
             if (error.message.includes('HTTP error')) {
                 showModal('Error loading teacher data. Please try again.');
+                document.getElementById('teacher-title').textContent = `Teacher ID ${teacherId}`;
+                document.getElementById('teacher-bio').textContent = 'No bio available due to error.';
+                document.getElementById('teacher-summary').textContent = 'No summary available due to error.';
+                document.getElementById('avg-rating').innerHTML = '☆☆☆☆☆ (0)';
             }
             const ratingForm = document.getElementById('rating-form');
             const ratingHeading = document.getElementById('rating-heading');
@@ -121,11 +125,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 img.src = '/images/default-teacher.jpg';
                 img.alt = `Default image for teacher ID ${teacherId}`; // Update alt text
             };
-            // Set default values if fetch fails
-            document.getElementById('teacher-title').textContent = `Teacher ID ${teacherId}`;
-            document.getElementById('teacher-bio').textContent = 'No bio available due to error.';
-            document.getElementById('teacher-summary').textContent = 'No summary available due to error.';
-            document.getElementById('avg-rating').innerHTML = '☆☆☆☆☆ (0)';
         }
     }
 

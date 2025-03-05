@@ -90,6 +90,7 @@ body {
     margin: 20px 0;
     color: #000000; /* Black text for bio/summary */
     text-align: justify; /* Justify text for paragraph-like appearance */
+    display: block; /* Ensure visibility, in case of any override */
 }
 #teacher-summary {
     font-style: italic; /* Italicize summary for distinction */
