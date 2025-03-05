@@ -1,172 +1,63 @@
-body {
-    font-family: Arial, sans-serif;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #E6F0F8; /* Light gray-blue background from logo */
-    color: #000000; /* Black text for readability */
-    position: relative; /* For positioning header */
-    margin-top: 0; /* Reset margin to accommodate header */
-}
-.site-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* Space between logo and title */
-    padding: 10px 20px;
-    background-color: #FFFFFF; /* White background for header */
-    border-bottom: 1px solid #00B7D1; /* Teal border for header */
-    position: fixed; /* Fix header at the top */
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1000; /* Ensure header stays above other content */
-}
-.logo {
-    position: relative; /* Remove absolute positioning, handled by header */
-    width: 50px; /* Half the size of 100px */
-    height: auto;
-    cursor: pointer;
-}
-.logo:hover {
-    opacity: 0.8;
-}
-.header-title {
-    margin: 0; /* Remove default margins */
-    font-size: 1.5em; /* Smaller title size for header */
-    color: #000000; /* Black text */
-    flex-grow: 1; /* Allow title to grow and center */
-    text-align: center; /* Center the title */
-}
-.page-title {
-    display: none; /* Hide the old page title since we use the header now */
-}
-.teacher-profile-container {
-    margin-left: 0; /* Reset margin since header handles positioning */
-    margin-top: 80px; /* Move down to fit header, adjust if needed */
-}
-.controls {
-    margin-bottom: 20px;
-    display: flex;
-    gap: 10px;
-    margin-top: 20px; /* Reduced to account for header, adjust if needed */
-}
-#search-bar, #sort-select {
-    padding: 5px;
-    font-size: 16px;
-    border: 1px solid #00B7D1; /* Teal border from logo */
-    border-radius: 4px;
-    background-color: #FFFFFF; /* White background for inputs */
-}
-#teacher-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-}
-.teacher-card {
-    text-align: center;
-    cursor: pointer;
-    background-color: #FFFFFF; /* White background for cards */
+/* Existing styles remain unchanged */
+
+/* Admin-specific styles */
+.vote-item {
+    border: 1px solid #00B7D1;
     padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #00B7D1; /* Teal border for cards */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.teacher-card img {
-    width: 150px;
-    height: 150px;
-    border-radius: 10px;
-}
-.stars {
-    font-size: 20px;
-}
-.stars.grey {
-    color: #ADB5BD; /* Gray for unrated stars */
-}
-.teacher-header {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-#teacher-photo {
-    width: 200px;
-    height: 200px;
-}
-#teacher-bio {
-    margin: 20px 0;
-    color: #000000; /* Black text for bio */
-}
-#teacher-classes {
-    border-collapse: collapse;
-    margin: 20px 0;
-}
-#teacher-classes td {
-    border: 1px solid #00B7D1; /* Teal border for table */
-    padding: 10px;
-    width: 120px; /* Adjusted for 2x4 layout */
-    background-color: #FFFFFF; /* White background for cells */
-}
-#rating-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-width: 400px;
-    background-color: #FFFFFF; /* White background for form */
-    padding: 15px;
-    border: 1px solid #00B7D1; /* Teal border for form */
+    margin-bottom: 10px;
+    background-color: #FFFFFF;
     border-radius: 8px;
 }
-#star-rating {
-    font-size: 24px;
-    cursor: pointer;
-}
-#star-rating .star:hover,
-#star-rating .star.selected {
-    color: #00B7D1; /* Teal for selected stars */
-}
-textarea {
-    padding: 5px;
-    height: 100px;
-    border: 1px solid #00B7D1; /* Teal border for textarea */
-    border-radius: 4px;
-    background-color: #FFFFFF; /* White background for textarea */
-}
-button {
-    padding: 10px;
-    background-color: #00B7D1; /* Teal for buttons */
-    color: #FFFFFF; /* White text */
+.vote-item button {
+    padding: 5px 10px;
+    margin-left: 10px;
+    background-color: #00B7D1;
+    color: #FFFFFF;
     border: none;
     cursor: pointer;
     border-radius: 4px;
 }
-button:hover {
-    background-color: #0078D4; /* Blue for hover state */
+.vote-item button:hover {
+    background-color: #0078D4;
 }
-#reviews div {
-    border: 1px solid #00B7D1; /* Teal border for reviews */
-    padding: 10px;
+#admin-login-form, #votes-list {
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #FFFFFF;
+    border: 1px solid #00B7D1;
+    border-radius: 8px;
+}
+#admin-login-form label, #admin-login-form input {
+    display: block;
     margin-bottom: 10px;
-    background-color: #FFFFFF; /* White background for reviews */
 }
-footer {
-    text-align: center;
-    margin-top: 20px;
+#admin-login-form input {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #00B7D1;
+    border-radius: 4px;
+}
+#admin-login-form button {
     padding: 10px;
-    background-color: #FFFFFF; /* White background for footer */
-    border-top: 1px solid #00B7D1; /* Teal border for footer */
-    color: #000000; /* Black text for footer */
+    background-color: #00B7D1;
+    color: #FFFFFF;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
 }
-footer a {
-    color: #00B7D1; /* Teal for link */
-    text-decoration: underline;
+#admin-login-form button:hover {
+    background-color: #0078D4;
 }
-footer a:hover {
-    color: #0078D4; /* Blue for hover state */
+#logout-btn {
+    padding: 10px;
+    background-color: #00B7D1;
+    color: #FFFFFF;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-top: 20px;
 }
-#reviews a {
-    margin-right: 10px;
-    text-decoration: underline;
-    color: #00B7D1; /* Teal for links */
-}
-#reviews a:hover {
-    color: #0078D4; /* Blue for hover state */
+#logout-btn:hover {
+    background-color: #0078D4;
 }

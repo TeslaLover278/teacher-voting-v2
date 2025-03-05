@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <header class="site-header">
+        <img src="https://via.placeholder.com/50" alt="Teacher Rating Logo" class="logo" onclick="window.location.href='/'">
+        <h1 class="header-title">Admin Dashboard</h1>
+    </header>
+    <div class="teacher-profile-container" style="margin-top: 80px;">
+        <h2>Manage Votes</h2>
+        <div id="votes-list"></div>
+        <button id="logout-btn">Logout</button>
+    </div>
+    <script>
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+            window.location.href = '/admin/login.html';
+            return;
+        }
+
+        async function loadVotes() {
+            try {
+                const response = await fetch('/api/admin/votes', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error('Failed to load votes');
+                const votes = await response.json();
+                const votesList = document.getElementById('votes-list');
+                votesList.innerHTML = votes.map(vote => `
+                    <div class="vote-item">
+                        <p>Teacher ID: ${vote.teacher_id}, Rating: ${vote.rating}, Review: ${vote.review || 'No review'}</p>
+                        <button onclick="modifyVote(${vote.teacher_id}, ${vote.rating}, '${vote.review || ''}')">Modify</button>
+                        <button onclick="deleteVote(${vote.teacher_id})">Delete</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                alert('Error loading votes. Please try again.');
+                console.error('Admin Dashboard - Error:', error);
+            }
+        }
+
+        async function modifyVote(teacherId, currentRating, currentReview) {
+            const newRating = prompt('Enter new rating (1-5):', currentRating);
+            const newReview = prompt('Enter new review (optional):', currentReview);
+            if (newRating && !isNaN(newRating) && newRating >= 1 && newRating <= 5) {
+                try {
+                    const response = await fetch(`/api/admin/votes/${teacherId}`, {
+                        method: 'PUT',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ rating: parseInt(newRating), review: newReview || '' })
+                    });
+                    if (!response.ok) throw new Error('Failed to modify vote');
+                    loadVotes();
+                    alert('Vote modified successfully!');
+                } vote (error) {
+                    alert('Error modifying vote. Please try again.');
+                    console.error('Admin Dashboard - Modify Error:', error);
+                }
+            } else {
+                alert('Invalid rating. Please enter a number between 1 and 5.');
+            }
+        }
+
+        async function deleteVote(teacherId) {
+            if (confirm('Are you sure you want to delete this vote?')) {
+                try {
+                    const response = await fetch(`/api/admin/votes/${teacherId}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) throw new Error('Failed to delete vote');
+                    loadVotes();
+                    alert('Vote deleted successfully!');
+                } catch (error) {
+                    alert('Error deleting vote. Please try again.');
+                    console.error('Admin Dashboard - Delete Error:', error);
+                }
+            }
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('adminToken');
+            window.location.href = '/admin/login.html';
+        });
+
+        loadVotes();
+    </script>
+</body>
+</html>
