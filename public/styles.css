@@ -11,7 +11,7 @@ body {
 .site-header {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Space between logo and title */
+    justify-content: space-between; /* Space between logo, title, and admin button */
     padding: 10px 20px;
     background-color: #FFFFFF; /* White background for header */
     border-bottom: 1px solid #00B7D1; /* Teal border for header */
@@ -36,6 +36,18 @@ body {
     color: #000000; /* Black text */
     flex-grow: 1; /* Allow title to grow and center */
     text-align: center; /* Center the title */
+}
+.admin-btn {
+    padding: 10px;
+    background-color: #00B7D1; /* Teal for admin button */
+    color: #FFFFFF; /* White text */
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-left: 10px; /* Space from title */
+}
+.admin-btn:hover {
+    background-color: #0078D4; /* Blue for hover state */
 }
 .page-title {
     display: none; /* Hide the old page title since we use the header now */
@@ -193,7 +205,7 @@ footer a:hover {
 .vote-item button:hover {
     background-color: #0078D4;
 }
-#admin-login-form, #votes-list {
+#admin-login-form, #votes-list, #teacher-form, #teachers-list {
     max-width: 400px;
     margin: 20px auto;
     padding: 20px;
@@ -201,17 +213,17 @@ footer a:hover {
     border: 1px solid #00B7D1;
     border-radius: 8px;
 }
-#admin-login-form label, #admin-login-form input {
+#admin-login-form label, #admin-login-form input, #teacher-form input {
     display: block;
     margin-bottom: 10px;
 }
-#admin-login-form input {
+#admin-login-form input, #teacher-form input {
     width: 100%;
     padding: 5px;
     border: 1px solid #00B7D1;
     border-radius: 4px;
 }
-#admin-login-form button {
+#admin-login-form button, #teacher-form button {
     padding: 10px;
     background-color: #00B7D1;
     color: #FFFFFF;
@@ -219,7 +231,7 @@ footer a:hover {
     cursor: pointer;
     border-radius: 4px;
 }
-#admin-login-form button:hover {
+#admin-login-form button:hover, #teacher-form button:hover {
     background-color: #0078D4;
 }
 #logout-btn {

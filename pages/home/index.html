@@ -10,16 +10,8 @@
     <header class="site-header">
         <img src="/images/logo.png" alt="Teacher Rating Logo" class="logo" onclick="window.location.href='/'">
         <h1 class="header-title">Rate Your Teachers</h1>
+        <button class="admin-btn" onclick="window.location.href='/admin/login.html'">Admin</button>
     </header>
-    <div id="add-teacher-form" style="margin: 20px 0;">
-        <h2>Add a New Teacher</h2>
-        <form id="teacher-form">
-            <input type="text" name="name" placeholder="Teacher Name" required>
-            <input type="text" name="bio" placeholder="Bio" required>
-            <input type="text" name="classes" placeholder="Classes (comma-separated)" required>
-            <button type="submit">Add Teacher</button>
-        </form>
-    </div>
     <div class="controls">
         <input type="text" id="search-bar" placeholder="Search by teacher name...">
         <select id="sort-select">
@@ -33,30 +25,5 @@
         <p>Missing Teacher? Contact <a href="mailto:reagan.hartney@gmail.com">reagan.hartney@gmail.com</a> to add a teacher!</p>
     </footer>
     <script src="/home/script.js"></script>
-    <script>
-        document.getElementById('teacher-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = {
-                name: formData.get('name'),
-                bio: formData.get('bio'),
-                classes: formData.get('classes').split(',').map(c => c.trim())
-            };
-            try {
-                const response = await fetch('/api/teachers', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                if (!response.ok) throw new Error('Failed to add teacher');
-                const result = await response.json();
-                alert('Teacher added successfully!');
-                e.target.reset();
-            } catch (error) {
-                alert('Error adding teacher. Please try again.');
-                console.error('Error adding teacher:', error);
-            }
-        });
-    </script>
 </body>
 </html>

@@ -1,42 +1,30 @@
-async function loadTeachers(sort = 'default', search = '') {
-    const url = `/api/teachers?sort=${encodeURIComponent(sort)}&search=${encodeURIComponent(search)}`;
-    const response = await fetch(url);
-    const teachers = await response.json();
-    const grid = document.getElementById('teacher-grid');
-    grid.innerHTML = ''; // Clear existing teachers
-    teachers.forEach((t, i) => {
-        const card = document.createElement('div');
-        card.className = 'teacher-card';
-        const avgStars = t.avg_rating ? `${'★'.repeat(Math.round(t.avg_rating))}${'☆'.repeat(5 - Math.round(t.avg_rating))}` : '☆☆☆☆☆';
-        card.innerHTML = `
-            <img src="/images/teacher${t.id}.jpg" alt="${t.name}">
-            <h3>${t.name}</h3>
-            <div class="stars ${t.avg_rating ? '' : 'grey'}">${avgStars}</div>
-        `;
-        card.onclick = () => window.location.href = `/teacher/teacher.html?id=${t.id}`;
-        grid.appendChild(card);
-    });
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const searchBar = document.getElementById('search-bar');
+    const sortSelect = document.getElementById('sort-select');
+    const teacherGrid = document.getElementById('teacher-grid');
 
-document.getElementById('search-bar').addEventListener('input', (e) => {
-    loadTeachers(document.getElementById('sort-select').value, e.target.value);
+    async function loadTeachers() {
+        const searchQuery = searchBar.value;
+        const sortBy = sortSelect.value;
+        const response = await fetch(`/api/teachers?search=${encodeURIComponent(searchQuery)}&sort=${sortBy}`);
+        const teachers = await response.json();
+        
+        teacherGrid.innerHTML = '';
+        teachers.forEach(teacher => {
+            const card = document.createElement('div');
+            card.className = 'teacher-card';
+            card.innerHTML = `
+                <img src="/images/teacher${teacher.id}.jpg" alt="${teacher.name}">
+                <h3>${teacher.name}</h3>
+                <p>${teacher.bio}</p>
+                <div class="stars">${'★'.repeat(Math.round(teacher.avg_rating || 0))}${'☆'.repeat(5 - Math.round(teacher.avg_rating || 0))}</div>
+            `;
+            card.onclick = () => window.location.href = `/teacher/teacher.html?id=${teacher.id}`;
+            teacherGrid.appendChild(card);
+        });
+    }
+
+    searchBar.addEventListener('input', loadTeachers);
+    sortSelect.addEventListener('change', loadTeachers);
+    loadTeachers();
 });
-
-document.getElementById('sort-select').addEventListener('change', (e) => {
-    loadTeachers(e.target.value, document.getElementById('search-bar').value);
-});
-
-// Load initial teachers
-loadTeachers();
-
-function setCookie(name, value, days) {
-    const date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
-}
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return '';
-}

@@ -36,9 +36,9 @@ function authenticateAdmin(req, res, next) {
 
 // Admin login
 app.post('/api/admin/login', (req, res) => {
+    console.log('Server - Admin login attempt for:', req.body.username);
+    console.log('Server - Credentials match:', req.body.username === ADMIN_CREDENTIALS.username && req.body.password === ADMIN_CREDENTIALS.password);
     const { username, password } = req.body;
-    console.log('Server - Admin login attempt for:', username);
-    console.log('Server - Credentials match:', username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password);
     if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
         res.json({ token: 'admin-token' });
     } else {
@@ -79,7 +79,7 @@ app.delete('/api/admin/votes/:teacherId', authenticateAdmin, (req, res) => {
     }
 });
 
-// Get all teachers with average ratings and sorting options
+// Get all teachers (admin only for dashboard, but public for main app)
 app.get('/api/teachers', (req, res) => {
     let teachersWithRatings = teachers.map(teacher => {
         const teacherRatings = ratings.filter(r => r.teacher_id === teacher.id);
@@ -137,8 +137,8 @@ app.post('/api/ratings', (req, res) => {
     res.json({ message: 'Rating submitted!' });
 });
 
-// Add a new teacher (for easy addition)
-app.post('/api/teachers', (req, res) => {
+// Add a new teacher (admin only)
+app.post('/api/teachers', authenticateAdmin, (req, res) => {
     const { name, bio, classes } = req.body;
     const newTeacher = {
         id: teachers.length ? Math.max(...teachers.map(t => t.id)) + 1 : 1,
@@ -150,6 +150,21 @@ app.post('/api/teachers', (req, res) => {
     console.log('Server - Added new teacher:', newTeacher.name);
     console.log('Server - New teacher ID:', newTeacher.id);
     res.json(newTeacher);
+});
+
+// Delete a teacher and their votes (admin only)
+app.delete('/api/admin/teachers/:id', authenticateAdmin, (req, res) => {
+    const id = parseInt(req.params.id);
+    const initialTeacherLength = teachers.length;
+    teachers = teachers.filter(t => t.id !== id);
+    if (teachers.length < initialTeacherLength) {
+        ratings = ratings.filter(r => r.teacher_id !== id); // Remove all votes for this teacher
+        console.log('Server - Deleted teacher ID:', id);
+        console.log('Server - Teachers remaining:', teachers.length);
+        res.json({ message: 'Teacher and their votes deleted successfully!' });
+    } else {
+        res.status(404).json({ error: 'Teacher not found' });
+    }
 });
 
 app.get('/', (req, res) => {
