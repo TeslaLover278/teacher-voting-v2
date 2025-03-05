@@ -15,13 +15,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const teachingSentence = `Teaches ${teacher.classes.join(', ').toLowerCase()} classes.`;
             const card = document.createElement('div');
             card.className = 'teacher-card';
-            const avgStars = teacher.avg_rating ? `${'★'.repeat(Math.round(teacher.avg_rating))}${'☆'.repeat(5 - Math.round(teacher.avg_rating))}` : 'No ratings yet';
+            // Show 0 stars with (0) if no votes, otherwise show stars with vote count
+            const stars = teacher.avg_rating !== null && teacher.rating_count > 0 
+                ? `${'★'.repeat(Math.round(teacher.avg_rating))}${'☆'.repeat(5 - Math.round(teacher.avg_rating))}`
+                : '☆☆☆☆☆';
             const voteCount = teacher.rating_count || 0;
             card.innerHTML = `
                 <img src="/images/teacher${teacher.id}.jpg" alt="${teacher.name}">
                 <h3>${teacher.name}</h3>
                 <p>${teachingSentence}</p>
-                <div class="stars">${avgStars} (${voteCount})</div>
+                <div class="stars">${stars} (${voteCount})</div>
             `;
             // Add onerror handler for image fallback
             const img = card.querySelector('img');

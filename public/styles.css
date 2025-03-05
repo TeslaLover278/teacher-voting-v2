@@ -57,6 +57,12 @@ body {
     margin-left: 0; /* Reset margin since header handles positioning */
     margin-top: 100px; /* Increased to move content down further, adjust if needed */
 }
+#teacher-title {
+    text-align: center;
+    font-size: 2em;
+    color: #000000; /* Black text for title */
+    margin-bottom: 20px;
+}
 .teacher-content {
     display: flex;
     gap: 20px;

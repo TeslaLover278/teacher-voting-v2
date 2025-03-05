@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const teacher = await response.json();
             
             console.log('LoadTeacher - Fetched data for teacher', teacherId);
-            console.log('LoadTeacher - Avg rating:', teacher.avg_rating || 'No ratings');
+            console.log('LoadTeacher - Avg rating:', teacher.avg_rating || 'No ratings', 'Votes:', teacher.rating_count);
 
             // Use a local file path for the teacher photo based on teacher ID, with fallback
             const teacherPhotoPath = `/images/teacher${teacher.id}.jpg`;
@@ -51,9 +51,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('teacher-bio').textContent = teacher.bio || 'No bio available.';
             document.getElementById('teacher-summary').textContent = teacher.summary || 'No summary available.';
 
-            const avgStars = teacher.avg_rating ? `${'★'.repeat(Math.round(teacher.avg_rating))}${'☆'.repeat(5 - Math.round(teacher.avg_rating))}` : 'No ratings yet';
+            // Show 0 stars with (0) if no votes, otherwise show stars with vote count
+            const stars = teacher.avg_rating !== null && teacher.rating_count > 0 
+                ? `${'★'.repeat(Math.round(teacher.avg_rating))}${'☆'.repeat(5 - Math.round(teacher.avg_rating))}`
+                : '☆☆☆☆☆';
             const voteCount = teacher.rating_count || 0;
-            document.getElementById('avg-rating').innerHTML = `${avgStars} (${voteCount})`;
+            document.getElementById('avg-rating').innerHTML = `${stars} (${voteCount})`;
 
             const table = document.getElementById('teacher-classes');
             table.innerHTML = ''; // Clear existing table
@@ -87,13 +90,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const ratingForm = document.getElementById('rating-form');
             const ratingHeading = document.getElementById('rating-heading');
             if (hasVoted) {
-                ratingForm.style.display = 'none';
-                ratingHeading.style.display = 'none';
-                console.log('Vote - Form hidden for teacher', teacherId);
+                ratingForm.style.display = 'block'; // Allow editing existing votes
+                ratingHeading.style.display = 'block';
+                console.log('Vote - Form shown for editing existing vote for teacher', teacherId);
             } else {
                 ratingForm.style.display = 'block';
                 ratingHeading.style.display = 'block';
-                console.log('Vote - Form shown for teacher', teacherId);
+                console.log('Vote - Form shown for new vote for teacher', teacherId);
             }
 
             document.querySelector('.logo').addEventListener('click', () => {
@@ -124,6 +127,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('teacher-name').textContent = `Teacher ID ${teacherId}`;
             document.getElementById('teacher-bio').textContent = 'No bio available due to error.';
             document.getElementById('teacher-summary').textContent = 'No summary available due to error.';
+            // Set default stars and vote count if fetch fails
+            document.getElementById('avg-rating').innerHTML = '☆☆☆☆☆ (0)';
         }
     }
 
@@ -166,16 +171,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await response.json();
             console.log('Vote - Submitted, response:', result.message);
 
-            // Remove the yes/no modal and show a non-intrusive notification
-            showNotification('Your response has been recorded.');
-
             const cookieStr = getCookie('votedTeachers') || '';
             const votedArray = cookieStr ? cookieStr.split(',').map(id => id.trim()).filter(Boolean) : [];
-            if (!votedArray.includes(teacherId.toString())) {
+            let hasVoted = votedArray.includes(teacherId.toString());
+
+            if (hasVoted) {
+                // Edit existing vote
+                await fetch(`/api/ratings/${teacherId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rating: selectedRating, review })
+                });
+                showModal('Your previous vote has been updated.');
+            } else {
+                // Add new vote
                 votedArray.push(teacherId.toString());
                 setCookie('votedTeachers', votedArray.join(','), 365);
-            } else {
-                throw new Error('Duplicate vote detected');
+                showNotification('Your response has been recorded.');
             }
 
             await loadTeacher();
@@ -183,9 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('rating-heading').style.display = 'none';
         } catch (error) {
             console.error('Vote - Error:', error.message);
-            if (error.message === 'Duplicate vote detected') {
-                showModal("You have already rated this teacher. Your rating remains unchanged.");
-            } else if (error.message.includes('HTTP error')) {
+            if (error.message.includes('HTTP error')) {
                 showModal('Error submitting your rating. Please try again.');
             } else {
                 showModal('An unexpected error occurred while submitting your rating. Please try again.');
