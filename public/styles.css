@@ -44,8 +44,8 @@ body {
     border: none;
     cursor: pointer;
     border-radius: 4px;
-    margin-left: 20px; /* Increased margin to stick out more from the side */
-    margin-right: 10px; /* Space from edge */
+    margin-left: 30px; /* Increased margin to stick out more from the side */
+    margin-right: 20px; /* Space from edge */
 }
 .admin-btn:hover {
     background-color: #0078D4; /* Blue for hover state */
@@ -55,51 +55,20 @@ body {
 }
 .teacher-profile-container {
     margin-left: 0; /* Reset margin since header handles positioning */
-    margin-top: 80px; /* Move down to fit header, adjust if needed */
+    margin-top: 100px; /* Increased to move content down further, adjust if needed */
 }
-.controls {
-    margin-bottom: 20px;
+.teacher-content {
     display: flex;
-    gap: 10px;
-    margin-top: 20px; /* Reduced to account for header, ensure visibility */
-    padding: 10px; /* Add padding for visibility */
-    background-color: #FFFFFF; /* White background for controls */
-    border: 1px solid #00B7D1; /* Teal border for controls */
-    border-radius: 8px;
-}
-#search-bar, #sort-select {
-    padding: 5px;
-    font-size: 16px;
-    border: 1px solid #00B7D1; /* Teal border from logo */
-    border-radius: 4px;
-    background-color: #FFFFFF; /* White background for inputs */
-}
-#teacher-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
-    padding: 10px; /* Add padding for visibility */
+    justify-content: space-between;
 }
-.teacher-card {
-    text-align: center;
-    cursor: pointer;
-    background-color: #FFFFFF; /* White background for cards */
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #00B7D1; /* Teal border for cards */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.teacher-left {
+    flex: 1;
+    max-width: 300px; /* Limit width of left section */
 }
-.teacher-card img {
-    width: 150px;
-    height: 150px;
-    border-radius: 10px;
-    object-fit: contain; /* Maintain aspect ratio for teacher cards on main page */
-}
-.stars {
-    font-size: 20px;
-}
-.stars.grey {
-    color: #ADB5BD; /* Gray for unrated stars */
+.teacher-right {
+    flex: 2;
+    max-width: 600px; /* Limit width of right section */
 }
 .teacher-header {
     display: flex;
@@ -114,10 +83,12 @@ body {
 #teacher-bio {
     margin: 20px 0;
     color: #000000; /* Black text for bio */
+    text-align: justify; /* Justify text for paragraph-like appearance */
 }
 #teacher-classes {
     border-collapse: collapse;
     margin: 20px 0;
+    width: 100%; /* Ensure table fills right section */
 }
 #teacher-classes td {
     border: 1px solid #00B7D1; /* Teal border for table */
@@ -190,6 +161,56 @@ footer a:hover {
 #reviews a:hover {
     color: #0078D4; /* Blue for hover state */
 }
+.controls {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    margin-top: 100px; /* Increased to move down below header, adjust if needed */
+    padding: 15px; /* Increased padding for visibility */
+    background-color: #FFFFFF; /* White background for controls */
+    border: 1px solid #00B7D1; /* Teal border for controls */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for elevation */
+}
+#search-bar, #sort-select {
+    padding: 5px;
+    font-size: 16px;
+    border: 1px solid #00B7D1; /* Teal border from logo */
+    border-radius: 4px;
+    background-color: #FFFFFF; /* White background for inputs */
+}
+#teacher-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    padding: 15px; /* Increased padding for visibility */
+    margin-top: 20px; /* Additional space below controls */
+    background-color: #FFFFFF; /* White background for grid */
+    border: 1px solid #00B7D1; /* Teal border for grid */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for elevation */
+}
+.teacher-card {
+    text-align: center;
+    cursor: pointer;
+    background-color: #FFFFFF; /* White background for cards */
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #00B7D1; /* Teal border for cards */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.teacher-card img {
+    width: 150px;
+    height: 150px;
+    border-radius: 10px;
+    object-fit: contain; /* Maintain aspect ratio for teacher cards on main page */
+}
+.stars {
+    font-size: 20px;
+}
+.stars.grey {
+    color: #ADB5BD; /* Gray for unrated stars */
+}
 
 /* Admin-specific styles */
 .admin-container {
@@ -248,4 +269,13 @@ footer a:hover {
     display: block;
     margin: 20px auto;
     width: 120px; /* Fixed width for logout button */
+    padding: 10px;
+    background-color: #00B7D1; /* Teal for logout button */
+    color: #FFFFFF; /* White text */
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.logout-btn:hover {
+    background-color: #0078D4; /* Blue for hover state */
 }

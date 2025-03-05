@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('teacher-photo').src = teacherPhotoPath;
             document.getElementById('teacher-name').textContent = teacher.name;
             document.getElementById('teacher-bio').textContent = teacher.bio;
+
             const avgStars = teacher.avg_rating ? `${'★'.repeat(Math.round(teacher.avg_rating))}${'☆'.repeat(5 - Math.round(teacher.avg_rating))}` : 'No ratings yet';
             document.getElementById('avg-rating').textContent = avgStars;
 

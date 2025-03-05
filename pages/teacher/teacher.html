@@ -13,21 +13,26 @@
         <button class="admin-btn" onclick="window.location.href='/admin/login.html'">Admin</button>
     </header>
     <div id="teacher-profile" class="teacher-profile-container">
-        <div class="teacher-header">
-            <img id="teacher-photo" src="" alt="Teacher Photo">
-            <h2 id="teacher-name"></h2>
-        </div>
-        <p id="teacher-bio"></p>
-        <table id="teacher-classes"></table>
-        <h3 id="rating-heading">Your Rating</h3>
-        <form id="rating-form">
-            <div id="star-rating"></div>
-            <textarea id="review" placeholder="Write your review"></textarea>
-            <button type="submit">Submit Rating</button>
-        </form>
-        <h3>Average Rating: <span id="avg-rating"></span></h3>
-        <div id="reviews">
-            <p><a href="#reviews" id="read-reviews-link">Read Reviews</a> | <a href="/" id="back-home-link">Back to Main Page</a></p>
+        <div class="teacher-content">
+            <div class="teacher-left">
+                <div class="teacher-header">
+                    <img id="teacher-photo" src="" alt="Teacher Photo">
+                </div>
+                <p id="teacher-bio"></p>
+            </div>
+            <div class="teacher-right">
+                <table id="teacher-classes"></table>
+                <h3 id="rating-heading">Your Rating</h3>
+                <form id="rating-form">
+                    <div id="star-rating"></div>
+                    <textarea id="review" placeholder="Write your review"></textarea>
+                    <button type="submit">Submit Rating</button>
+                </form>
+                <h3>Average Rating: <span id="avg-rating"></span></h3>
+                <div id="reviews">
+                    <p><a href="#reviews" id="read-reviews-link">Read Reviews</a> | <a href="/" id="back-home-link">Back to Main Page</a></p>
+                </div>
+            </div>
         </div>
     </div>
     <footer>
