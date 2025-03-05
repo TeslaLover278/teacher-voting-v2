@@ -29,7 +29,13 @@ async function loadTeacher() {
     const votedTeachers = getCookie('votedTeachers').split(',').filter(Boolean);
     if (votedTeachers.includes(teacherId)) {
         document.getElementById('rating-form').style.display = 'none';
+        document.getElementById('rating-heading').style.display = 'none'; // Hide "Your Rating" heading
     }
+
+    // Home button functionality
+    document.getElementById('home-button').addEventListener('click', () => {
+        window.location.href = '/';
+    });
 }
 
 const starRating = document.getElementById('star-rating');
@@ -62,15 +68,31 @@ document.getElementById('rating-form').addEventListener('submit', async (e) => {
         body: JSON.stringify({ teacher_id: teacherId, rating: selectedRating, review })
     });
     const result = await response.json();
-    alert(result.message);
 
+    // Show popup instead of alert
+    const popup = document.getElementById('vote-popup');
+    popup.style.display = 'block';
+
+    document.getElementById('read-reviews').addEventListener('click', () => {
+        popup.style.display = 'none';
+        // Scroll to reviews or keep on page (no action needed here as reviews are already visible)
+    });
+
+    document.getElementById('back-home').addEventListener('click', () => {
+        popup.style.display = 'none';
+        window.location.href = '/';
+    });
+
+    // Update cookie
     const votedTeachers = getCookie('votedTeachers').split(',').filter(Boolean);
     if (!votedTeachers.includes(teacherId)) {
         votedTeachers.push(teacherId);
         setCookie('votedTeachers', votedTeachers.join(','), 365);
     }
 
-    window.location.reload();
+    // Hide rating form and heading after voting
+    document.getElementById('rating-form').style.display = 'none';
+    document.getElementById('rating-heading').style.display = 'none';
 });
 
 loadTeacher();

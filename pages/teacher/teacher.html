@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+    <button id="home-button">Home</button>
     <div id="teacher-profile">
         <div class="teacher-header">
             <img id="teacher-photo" src="" alt="Teacher Photo">
@@ -14,7 +15,7 @@
         </div>
         <p id="teacher-bio"></p>
         <table id="teacher-classes"></table>
-        <h3>Your Rating</h3>
+        <h3 id="rating-heading">Your Rating</h3>
         <form id="rating-form">
             <div id="star-rating"></div>
             <textarea id="review" placeholder="Write your review"></textarea>
@@ -22,6 +23,11 @@
         </form>
         <h3>Average Rating: <span id="avg-rating"></span></h3>
         <div id="reviews"></div>
+    </div>
+    <div id="vote-popup" class="popup" style="display: none;">
+        <p>Thank you for your rating!</p>
+        <button id="read-reviews">Read Reviews</button>
+        <button id="back-home">Back to Main Page</button>
     </div>
     <script src="/teacher/teacher.js"></script>
 </body>

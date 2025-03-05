@@ -7,6 +7,7 @@ app.use('/home', express.static('pages/home'));
 app.use('/teacher', express.static('pages/teacher'));
 app.use(express.json());
 
+// In-memory database for teachers (easily editable)
 const teachers = [
     { id: 1, name: "Mrs. Emerson", bio: "Passionate about literature.", classes: ["English 9", "English 10", "Creative Writing", "Poetry", "Drama", "Lit Analysis"] },
     { id: 2, name: "Mrs. Hewitt", bio: "Math expert with a smile.", classes: ["Algebra", "Geometry", "Calculus", "Stats", "Trig", "Pre-Calc"] },
@@ -20,17 +21,43 @@ const teachers = [
 
 const ratings = [];
 
+// Get all teachers with average ratings and sorting options
 app.get('/api/teachers', (req, res) => {
-    const teachersWithRatings = teachers.map(teacher => {
+    let teachersWithRatings = teachers.map(teacher => {
         const teacherRatings = ratings.filter(r => r.teacher_id === teacher.id);
         const avgRating = teacherRatings.length
             ? teacherRatings.reduce((sum, r) => sum + r.rating, 0) / teacherRatings.length
             : null;
         return { ...teacher, avg_rating: avgRating, rating_count: teacherRatings.length };
     });
+
+    // Apply sorting based on query parameter
+    const sortBy = req.query.sort || 'default';
+    switch (sortBy) {
+        case 'alphabetical':
+            teachersWithRatings.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+        case 'ratings':
+            teachersWithRatings.sort((a, b) => (b.avg_rating || 0) - (a.avg_rating || 0));
+            break;
+        case 'default':
+        default:
+            // No sorting (maintain original order)
+            break;
+    }
+
+    // Apply search filter based on query parameter
+    const searchQuery = req.query.search || '';
+    if (searchQuery) {
+        teachersWithRatings = teachersWithRatings.filter(t => 
+            t.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }
+
     res.json(teachersWithRatings);
 });
 
+// Get a single teacher by ID with ratings
 app.get('/api/teachers/:id', (req, res) => {
     const id = parseInt(req.params.id);
     const teacher = teachers.find(t => t.id === id);
@@ -43,10 +70,24 @@ app.get('/api/teachers/:id', (req, res) => {
     res.json({ ...teacher, avg_rating: avgRating, ratings: teacherRatings });
 });
 
+// Submit a rating
 app.post('/api/ratings', (req, res) => {
     const { teacher_id, rating, review } = req.body;
     ratings.push({ teacher_id: parseInt(teacher_id), rating: parseInt(rating), review });
     res.json({ message: 'Rating submitted!' });
+});
+
+// Add a new teacher (for easy addition)
+app.post('/api/teachers', (req, res) => {
+    const { name, bio, classes } = req.body;
+    const newTeacher = {
+        id: teachers.length ? Math.max(...teachers.map(t => t.id)) + 1 : 1,
+        name,
+        bio,
+        classes: classes || []
+    };
+    teachers.push(newTeacher);
+    res.json(newTeacher);
 });
 
 app.get('/', (req, res) => {
