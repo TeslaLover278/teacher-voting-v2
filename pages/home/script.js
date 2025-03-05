@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.innerHTML = `
                     <img src="/images/teacher${teacher.id}.jpg" alt="${teacher.name}" onerror="this.src='/images/default-teacher.jpg'; this.alt='Default image for ${teacher.name}';">
                     <h3>${teacher.name}</h3>
-                    <p>${teacher.bio}</p>
+                    <p>${teacher.description}</p> <!-- Changed from bio to description -->
                     <p class="stars">${teacher.avg_rating ? '★'.repeat(Math.round(teacher.avg_rating)) + '☆'.repeat(5 - Math.round(teacher.avg_rating)) : '☆☆☆☆☆'} (${teacher.rating_count || 0} votes)</p>
                     <a href="/teacher/teacher.html?id=${teacher.id}" class="view-profile">View Profile</a>
                 `;

@@ -122,6 +122,9 @@ body {
     padding: 15px;
     border: 1px solid #00B7D1; /* Teal border for rating section */
     border-radius: 8px;
+    display: flex; /* Added */
+    flex-direction: column; /* Added */
+    align-items: center; /* Center horizontally */
 }
 .rating-heading {
     text-align: center;
@@ -133,17 +136,28 @@ body {
     flex-direction: column;
     gap: 10px;
     max-width: 400px;
+    width: 100%; /* Ensure it takes full available width */
+    align-items: center; /* Center form elements */
 }
 .star-rating {
     font-size: 24px;
     cursor: pointer;
     text-align: center;
+    margin-bottom: 10px; /* Added spacing */
 }
 .star {
     color: #ADB5BD; /* Gray for unselected stars */
 }
 .star.selected {
     color: #00B7D1; /* Teal for selected stars */
+}
+#rating-comment {
+    width: 100%; /* Full width of form */
+    max-width: 350px; /* Limit width */
+    padding: 5px;
+    border: 1px solid #00B7D1;
+    border-radius: 4px;
+    resize: vertical; /* Allow vertical resizing only */
 }
 .submit-btn {
     padding: 10px;

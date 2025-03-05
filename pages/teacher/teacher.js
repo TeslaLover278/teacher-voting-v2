@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
 
             document.getElementById('teacher-title').textContent = teacher.name; // Set name as title
-            document.getElementById('teacher-bio').textContent = teacher.bio || 'No bio available.';
+            document.getElementById('teacher-bio').textContent = teacher.bio || 'No bio available.'; // Show bio
             document.getElementById('teacher-summary').textContent = teacher.summary || 'No summary available.';
 
             // Show 0 stars with (0) if no votes, otherwise show stars with vote count
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             teacher.ratings.forEach(r => {
                 const div = document.createElement('div');
                 div.className = 'review-item';
-                div.innerHTML = `<strong>${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</strong><br>${r.review || ''}`;
+                div.innerHTML = `<strong>${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</strong><br>${r.comment || 'No comment provided.'}`; // Changed review to comment
                 reviewsDiv.appendChild(div);
             });
 
@@ -112,7 +112,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         } catch (error) {
             console.error('Client - Error loading teacher:', error.message);
-            // Only show modal and set error messages for critical HTTP errors
             if (error.message.includes('HTTP error')) {
                 showModal('Error loading teacher data. Please try again.');
             }
@@ -122,15 +121,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             ratingForm.style.display = 'block';
             ratingHeading.style.display = 'block';
             voteMessage.style.display = 'none';
-            // Attempt to load photo with fallback even if fetch fails
             const img = document.getElementById('teacher-photo');
             img.src = `/images/teacher${teacherId}.jpg`;
             img.onerror = () => {
                 console.error('Client - Fallback image load error for:', teacherId);
                 img.src = '/images/default-teacher.jpg';
-                img.alt = `Default image for teacher ID ${teacherId}`; // Update alt text
+                img.alt = `Default image for teacher ID ${teacherId}`;
             };
-            // Set default values if fetch fails
             document.getElementById('teacher-title').textContent = `Teacher ID ${teacherId}`;
             document.getElementById('teacher-bio').textContent = 'No bio available due to error.';
             document.getElementById('teacher-summary').textContent = 'No summary available due to error.';
@@ -166,12 +163,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        const comment = document.getElementById('rating-comment').value.trim();
         try {
             console.log('Client - Submitting vote for teacher', teacherId);
             const response = await fetch('/api/ratings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ teacher_id: teacherId, rating: selectedRating })
+                body: JSON.stringify({ teacher_id: teacherId, rating: selectedRating, comment }) // Send comment
             });
             if (!response.ok) {
                 const errorText = await response.text();
@@ -180,7 +178,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await response.json();
             console.log('Client - Vote submitted, response:', result.message);
 
-            // Hide the form and show the message after voting
             const ratingForm = document.getElementById('rating-form');
             const ratingHeading = document.getElementById('rating-heading');
             const voteMessage = document.getElementById('vote-message');
@@ -189,7 +186,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             voteMessage.style.display = 'block';
             showNotification('Your response has been recorded.');
 
-            // Reload teacher data to update ratings
             await loadTeacher();
         } catch (error) {
             console.error('Client - Error submitting vote:', error.message, error.stack);
