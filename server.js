@@ -54,7 +54,7 @@ app.get('/api/teachers', (req, res) => {
         );
     }
 
-    console.log('Debug - Teachers with ratings fetched:', teachersWithRatings.length, 'teachers');
+    console.log('Server Debug - Teachers with ratings fetched:', teachersWithRatings.length, 'teachers');
     res.json(teachersWithRatings);
 });
 
@@ -68,7 +68,7 @@ app.get('/api/teachers/:id', (req, res) => {
     const avgRating = teacherRatings.length
         ? teacherRatings.reduce((sum, r) => sum + r.rating, 0) / teacherRatings.length
         : null;
-    console.log('Debug - Teacher fetched with ID', id, ':', { ...teacher, avg_rating: avgRating, ratings: teacherRatings.length });
+    console.log('Server Debug - Teacher fetched with ID', id, ':', { ...teacher, avg_rating: avgRating, ratings: teacherRatings.length });
     res.json({ ...teacher, avg_rating: avgRating, ratings: teacherRatings });
 });
 
@@ -77,7 +77,7 @@ app.post('/api/ratings', (req, res) => {
     const { teacher_id, rating, review } = req.body;
     const newRating = { teacher_id: parseInt(teacher_id), rating: parseInt(rating), review };
     ratings.push(newRating);
-    console.log('Debug - New rating added for teacher', teacher_id, ':', newRating, 'Ratings array now:', ratings.length, 'entries');
+    console.log('Server Debug - New rating added for teacher', teacher_id, ':', newRating, 'Ratings array now:', ratings.length, 'entries');
     res.json({ message: 'Rating submitted!' });
 });
 
@@ -91,7 +91,7 @@ app.post('/api/teachers', (req, res) => {
         classes: classes || []
     };
     teachers.push(newTeacher);
-    console.log('Debug - New teacher added:', newTeacher);
+    console.log('Server Debug - New teacher added:', newTeacher);
     res.json(newTeacher);
 });
 
