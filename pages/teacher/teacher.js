@@ -5,17 +5,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function loadTeacher() {
         try {
             const response = await fetch(`/api/teachers/${teacherId}`);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+            }
             const teacher = await response.json();
             
             console.log('LoadTeacher - Fetched data for teacher', teacherId);
             console.log('LoadTeacher - Avg rating:', teacher.avg_rating || 'No ratings');
 
-            // Use a local file path for the teacher photo based on teacher ID
+            // Use a local file path for the teacher photo based on teacher ID, with fallback
             const teacherPhotoPath = `/images/teacher${teacher.id}.jpg`;
-            document.getElementById('teacher-photo').src = teacherPhotoPath;
+            const img = document.getElementById('teacher-photo');
+            img.src = teacherPhotoPath;
+            img.onerror = () => {
+                console.error('LoadTeacher - Image load error for:', teacherPhotoPath);
+                img.src = '/images/default-teacher.jpg'; // Fallback image if teacher photo fails
+            };
+
             document.getElementById('teacher-name').textContent = teacher.name;
-            document.getElementById('teacher-bio').textContent = teacher.bio;
+            document.getElementById('teacher-bio').textContent = teacher.bio || 'No bio available.';
 
             const avgStars = teacher.avg_rating ? `${'★'.repeat(Math.round(teacher.avg_rating))}${'☆'.repeat(5 - Math.round(teacher.avg_rating))}` : 'No ratings yet';
             document.getElementById('avg-rating').textContent = avgStars;
@@ -75,6 +83,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const ratingHeading = document.getElementById('rating-heading');
             ratingForm.style.display = 'block';
             ratingHeading.style.display = 'block';
+            // Ensure photo loads with fallback even if fetch fails
+            const img = document.getElementById('teacher-photo');
+            img.src = `/images/teacher${teacherId}.jpg`;
+            img.onerror = () => {
+                console.error('LoadTeacher - Fallback image load error for:', teacherId);
+                img.src = '/images/default-teacher.jpg';
+            };
         }
     }
 
