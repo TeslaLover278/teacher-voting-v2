@@ -30,12 +30,17 @@ async function loadTeacher() {
 
     const votedTeachers = getCookie('votedTeachers') || '';
     const votedArray = votedTeachers ? votedTeachers.split(',').filter(Boolean) : [];
+    console.log('Debug - votedTeachers cookie:', votedTeachers);
+    console.log('Debug - votedArray for teacher', teacherId, ':', votedArray, 'Includes teacherId?', votedArray.includes(teacherId.toString()));
+
     if (votedArray.includes(teacherId.toString())) {
         document.getElementById('rating-form').style.display = 'none';
         document.getElementById('rating-heading').style.display = 'none'; // Hide "Your Rating" heading
+        console.log('Debug - Hiding form for teacher', teacherId, 'due to prior vote');
     } else {
         document.getElementById('rating-form').style.display = 'block';
         document.getElementById('rating-heading').style.display = 'block';
+        console.log('Debug - Showing form for teacher', teacherId, 'as no prior vote found');
     }
 
     // Logo click functionality (navigates to homepage)
@@ -87,9 +92,11 @@ document.getElementById('rating-form').addEventListener('submit', async (e) => {
     // Update cookie to track only this teacher's vote, allowing voting on others by different users
     let votedTeachers = getCookie('votedTeachers') || '';
     let votedArray = votedTeachers ? votedTeachers.split(',').filter(Boolean) : [];
+    console.log('Debug - Before vote, votedArray:', votedArray, 'for teacher', teacherId);
     if (!votedArray.includes(teacherId.toString())) {
         votedArray.push(teacherId.toString());
         setCookie('votedTeachers', votedArray.join(','), 365);
+        console.log('Debug - Added vote for teacher', teacherId, 'New votedArray:', votedArray);
     } else {
         // Allow re-voting by notifying the user and preventing duplicate votes
         alert("You have already rated this teacher. Your rating remains unchanged.");
