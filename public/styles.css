@@ -149,6 +149,24 @@ button:hover {
     margin-bottom: 10px;
     background-color: #FFFFFF; /* White background for reviews */
 }
+.all-reviews {
+    margin-top: 20px;
+}
+.review-entry {
+    border: 1px solid #00B7D1; /* Teal border for review entries */
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #FFFFFF; /* White background for review entries */
+    border-radius: 8px;
+}
+.review-entry p {
+    margin: 5px 0;
+    color: #000000; /* Black text for reviews */
+}
+.review-entry hr {
+    border: 1px solid #00B7D1; /* Teal border for separator */
+    margin: 10px 0;
+}
 footer {
     text-align: center;
     margin-top: 20px;
