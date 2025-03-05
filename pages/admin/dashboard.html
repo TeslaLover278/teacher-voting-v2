@@ -134,7 +134,7 @@
         }
 
         async function deleteVote(teacherId) {
-            if (confirm('Are you sure you want to delete this vote?')) {
+            if (confirm('Are you sure you want to delete this vote?')) { // Keep confirm for admin
                 try {
                     const response = await fetch(`/api/admin/votes/${teacherId}`, {
                         method: 'DELETE',
@@ -151,7 +151,7 @@
         }
 
         async function deleteTeacher(teacherId) {
-            if (confirm('Are you sure you want to delete this teacher and all their votes?')) {
+            if (confirm('Are you sure you want to delete this teacher and all their votes?')) { // Keep confirm for admin
                 try {
                     const response = await fetch(`/api/admin/teachers/${teacherId}`, {
                         method: 'DELETE',

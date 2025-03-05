@@ -11,14 +11,23 @@ document.addEventListener('DOMContentLoaded', () => {
         
         teacherGrid.innerHTML = '';
         teachers.forEach(teacher => {
+            // Generate a single sentence about what the teacher teaches
+            const teachingSentence = `Teaches ${teacher.classes.join(', ').toLowerCase()} classes.`;
             const card = document.createElement('div');
             card.className = 'teacher-card';
             card.innerHTML = `
                 <img src="/images/teacher${teacher.id}.jpg" alt="${teacher.name}">
                 <h3>${teacher.name}</h3>
-                <p>${teacher.bio}</p>
+                <p>${teachingSentence}</p>
                 <div class="stars">${'★'.repeat(Math.round(teacher.avg_rating || 0))}${'☆'.repeat(5 - Math.round(teacher.avg_rating || 0))}</div>
             `;
+            // Add onerror handler for image fallback
+            const img = card.querySelector('img');
+            img.onerror = () => {
+                console.error('LoadTeachers - Image load error for:', `/images/teacher${teacher.id}.jpg`);
+                img.src = '/images/default-teacher.jpg'; // Fallback image if teacher photo fails
+                img.alt = `Default image for ${teacher.name}`; // Update alt text for accessibility
+            };
             card.onclick = () => window.location.href = `/teacher/teacher.html?id=${teacher.id}`;
             teacherGrid.appendChild(card);
         });

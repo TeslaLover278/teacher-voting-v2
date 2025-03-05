@@ -154,8 +154,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await response.json();
             console.log('Vote - Submitted, response:', result.message);
 
-            const choice = confirm("Thank you for your rating! Would you like to stay on this page to read reviews, or return to the main page?");
-            if (!choice) {
+            const stayOnPage = await new Promise((resolve) => {
+                showModalWithChoice("Thank you for your rating! Would you like to stay on this page to read reviews, or return to the main page?", resolve);
+            });
+            if (!stayOnPage) {
                 window.location.href = '/';
             } else {
                 document.getElementById('reviews').scrollIntoView({ behavior: 'smooth' });
@@ -185,6 +187,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     });
+
+    // Custom modal for yes/no choice (replaces confirm)
+    function showModalWithChoice(message, callback) {
+        const modal = document.getElementById('modal');
+        const modalMessage = document.getElementById('modal-message');
+        modalMessage.innerHTML = `${message}<br><button id="modal-yes" class="modal-btn">Yes</button><button id="modal-no" class="modal-btn">No</button>`;
+        modal.style.display = 'block';
+
+        document.getElementById('modal-yes').addEventListener('click', () => {
+            hideModal();
+            callback(true);
+        }, { once: true });
+
+        document.getElementById('modal-no').addEventListener('click', () => {
+            hideModal();
+            callback(false);
+        }, { once: true });
+    }
 
     function clearVotesForTesting() {
         setCookie('votedTeachers', '', -1);

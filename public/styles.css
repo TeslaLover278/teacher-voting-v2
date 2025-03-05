@@ -208,7 +208,7 @@ footer a:hover {
 .teacher-card p {
     margin: 5px 0;
     font-size: 14px;
-    color: #000000; /* Black text for bio */
+    color: #000000; /* Black text for bio/teaching sentence */
 }
 .stars {
     font-size: 20px;
@@ -318,6 +318,7 @@ footer a:hover {
     border: none;
     cursor: pointer;
     border-radius: 4px;
+    margin: 0 5px; /* Space between Yes/No buttons if used */
 }
 .modal-btn:hover {
     background-color: #0078D4; /* Blue for hover state */
