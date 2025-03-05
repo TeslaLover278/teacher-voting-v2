@@ -171,11 +171,11 @@ app.get('/api/teachers/:id', (req, res) => {
         ? teacherRatings.reduce((sum, r) => sum + r.rating, 0) / teacherRatings.length
         : null;
     console.log('Server - Fetched teacher ID:', id);
-    console.log('Server - Ratings count:', teacherRatings.length);
+    console.log('Server - Avg rating:', avgRating, 'Ratings count:', teacherRatings.length);
     res.json({ ...teacher, avg_rating: avgRating, ratings: teacherRatings, rating_count: teacherRatings.length });
 });
 
-// Submit or update a rating (edit past vote if already voted)
+// Submit a rating (only allow one vote per user per teacher)
 app.post('/api/ratings', (req, res) => {
     const { teacher_id, rating, review } = req.body;
     const teacherId = parseInt(teacher_id);
@@ -185,54 +185,40 @@ app.post('/api/ratings', (req, res) => {
     const votedArray = cookieStr ? cookieStr.split(',').map(id => id.trim()).filter(Boolean) : [];
 
     if (votedArray.includes(teacherId.toString())) {
-        // Edit existing vote using PUT
-        fetch(`/api/ratings/${teacherId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rating: parseInt(rating), review: review || '' })
-        }).then(response => {
-            if (!response.ok) throw new Error(`HTTP error updating vote! status: ${response.status}`);
-            console.log('Server - Updated rating for teacher via POST:', teacher_id);
-            console.log('Server - New rating:', rating);
-        }).catch(error => {
-            console.error('Server - Error updating vote:', error.message);
-            res.status(500).json({ error: 'Error updating your rating. Please try again.' });
-            return;
-        });
-    } else {
-        // Add new vote
-        ratings.push(newRating);
-        votedArray.push(teacherId.toString());
-        setCookie(res, 'votedTeachers', votedArray.join(','), 365);
-        console.log('Server - Added rating for teacher:', teacher_id);
-        console.log('Server - Ratings total:', ratings.length);
+        // User has already voted for this teacher, return an error
+        res.status(400).json({ error: 'You have already voted for this teacher.' });
+        return;
     }
+
+    // Add new vote
+    ratings.push(newRating);
+    votedArray.push(teacherId.toString());
+    setCookie(res, 'votedTeachers', votedArray.join(','), 365);
+    console.log('Server - Added rating for teacher:', teacher_id);
+    console.log('Server - Ratings total:', ratings.length);
 
     res.json({ message: 'Rating submitted!' });
 });
 
-// Update a rating (for user updates, fixed to handle both new and existing votes correctly)
-app.put('/api/ratings/:teacherId', (req, res) => {
+// Update a rating (for admin only, not for users)
+app.put('/api/ratings/:teacherId', authenticateAdmin, (req, res) => {
     const teacherId = parseInt(req.params.teacherId);
     const { rating, review } = req.body;
     const voteIndex = ratings.findIndex(r => r.teacher_id === teacherId);
 
     if (voteIndex === -1) {
-        // If no vote exists, add a new vote (this should not happen via user PUT, but handle it for robustness)
-        ratings.push({ teacher_id: teacherId, rating: parseInt(rating), review: review || '' });
-        console.log('Server - Added new rating for teacher (via PUT, unexpected):', teacherId);
-        console.log('Server - New rating:', rating);
-        res.json({ message: 'Rating added successfully!' });
-    } else {
-        // Update existing vote
-        ratings[voteIndex] = { teacher_id: teacherId, rating: parseInt(rating), review: review || '' };
-        console.log('Server - Updated vote for teacher:', teacherId);
-        console.log('Server - New rating:', rating);
-        res.json({ message: 'Vote updated successfully!' });
+        res.status(404).json({ error: 'Vote not found' });
+        return;
     }
+
+    // Update existing vote (admin only)
+    ratings[voteIndex] = { teacher_id: teacherId, rating: parseInt(rating), review: review || '' };
+    console.log('Server - Updated vote for teacher:', teacherId);
+    console.log('Server - New rating:', rating);
+    res.json({ message: 'Vote updated successfully!' });
 });
 
-// Delete a rating (for admin or user update logic)
+// Delete a rating (for admin only)
 app.delete('/api/ratings/:teacherId', authenticateAdmin, (req, res) => {
     const teacherId = parseInt(req.params.teacherId);
     const initialLength = ratings.length;

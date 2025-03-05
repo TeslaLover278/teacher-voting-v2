@@ -92,13 +92,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const ratingForm = document.getElementById('rating-form');
             const ratingHeading = document.getElementById('rating-heading');
+            const voteMessage = document.getElementById('vote-message');
             if (hasVoted) {
-                ratingForm.style.display = 'block'; // Allow editing existing votes
-                ratingHeading.style.display = 'block';
-                console.log('Vote - Form shown for editing existing vote for teacher', teacherId);
+                ratingForm.style.display = 'none'; // Hide form if already voted
+                ratingHeading.style.display = 'none';
+                voteMessage.style.display = 'block'; // Show message indicating they’ve already voted
+                console.log('Vote - User has already voted for teacher', teacherId);
             } else {
                 ratingForm.style.display = 'block';
                 ratingHeading.style.display = 'block';
+                voteMessage.style.display = 'none';
                 console.log('Vote - Form shown for new vote for teacher', teacherId);
             }
 
@@ -113,8 +116,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             const ratingForm = document.getElementById('rating-form');
             const ratingHeading = document.getElementById('rating-heading');
+            const voteMessage = document.getElementById('vote-message');
             ratingForm.style.display = 'block';
             ratingHeading.style.display = 'block';
+            voteMessage.style.display = 'none';
             // Attempt to load photo with fallback even if fetch fails
             const img = document.getElementById('teacher-photo');
             img.src = `/images/teacher${teacherId}.jpg`;
@@ -167,34 +172,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ teacher_id: teacherId, rating: selectedRating, review: review || '' })
             });
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status} - ${await response.text()}`);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+            }
             const result = await response.json();
             console.log('Vote - Submitted, response:', result.message);
 
-            const cookieStr = getCookie('votedTeachers') || '';
-            const votedArray = cookieStr ? cookieStr.split(',').map(id => id.trim()).filter(Boolean) : [];
-            let hasVoted = votedArray.includes(teacherId.toString());
-
-            if (hasVoted) {
-                // Update existing vote
-                const updateResponse = await fetch(`/api/ratings/${teacherId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ rating: selectedRating, review: review || '' })
-                });
-                if (!updateResponse.ok) throw new Error(`HTTP error updating vote! status: ${updateResponse.status} - ${await updateResponse.text()}`);
-                showModal('Your vote has been updated.');
-            } else {
-                // Add new vote
-                votedArray.push(teacherId.toString());
-                setCookie('votedTeachers', votedArray.join(','), 365);
-                showNotification('Your response has been recorded.');
-            }
+            // Hide the form and show the message after voting
+            const ratingForm = document.getElementById('rating-form');
+            const ratingHeading = document.getElementById('rating-heading');
+            const voteMessage = document.getElementById('vote-message');
+            ratingForm.style.display = 'none';
+            ratingHeading.style.display = 'none';
+            voteMessage.style.display = 'block';
+            showNotification('Your response has been recorded.');
 
             // Reload teacher data to update ratings
             await loadTeacher();
-            document.getElementById('rating-form').style.display = 'none';
-            document.getElementById('rating-heading').style.display = 'none';
         } catch (error) {
             console.error('Vote - Error:', error.message, error.stack); // Added stack trace for debugging
             if (error.message.includes('HTTP error')) {

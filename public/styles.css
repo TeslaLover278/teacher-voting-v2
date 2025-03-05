@@ -116,6 +116,11 @@ body {
     border: 1px solid #00B7D1; /* Teal border for form */
     border-radius: 8px;
 }
+#vote-message {
+    margin-top: 10px;
+    font-weight: bold;
+    text-align: center;
+}
 #star-rating {
     font-size: 24px;
     cursor: pointer;
