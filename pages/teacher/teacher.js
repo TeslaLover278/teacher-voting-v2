@@ -35,7 +35,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const teacher = await response.json();
             
             console.log('LoadTeacher - Fetched data for teacher', teacherId);
+            console.log('LoadTeacher - Bio:', teacher.bio || 'No bio');
+            console.log('LoadTeacher - Summary:', teacher.summary || 'No summary');
             console.log('LoadTeacher - Avg rating:', teacher.avg_rating || 'No ratings', 'Votes:', teacher.rating_count);
+            console.log('LoadTeacher - Ratings:', teacher.ratings || 'No ratings');
 
             // Use a local file path for the teacher photo based on teacher ID, with fallback
             const teacherPhotoPath = `/images/teacher${teacher.id}.jpg`;
@@ -84,6 +87,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 reviewsDiv.appendChild(div);
             });
 
+            // Display all reviews with ratings and comments
+            const allReviewsDiv = document.getElementById('all-reviews');
+            allReviewsDiv.innerHTML = ''; // Clear existing all-reviews
+            if (teacher.ratings && teacher.ratings.length > 0) {
+                teacher.ratings.forEach(r => {
+                    const reviewDiv = document.createElement('div');
+                    reviewDiv.className = 'review-entry';
+                    reviewDiv.innerHTML = `
+                        <p><strong>Rating:</strong> ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</p>
+                        <p><strong>Comment:</strong> ${r.review || 'No comment provided'}</p>
+                        <hr>
+                    `;
+                    allReviewsDiv.appendChild(reviewDiv);
+                });
+            } else {
+                allReviewsDiv.innerHTML = '<p>No reviews yet.</p>';
+            }
+
             const cookieStr = getCookie('votedTeachers') || '';
             const votedArray = cookieStr ? cookieStr.split(',').map(id => id.trim()).filter(Boolean) : [];
             const hasVoted = votedArray.includes(teacherId.toString());
@@ -91,9 +112,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const ratingForm = document.getElementById('rating-form');
             const ratingHeading = document.getElementById('rating-heading');
             if (hasVoted) {
-                ratingForm.style.display = 'block'; // Allow editing existing votes
+                ratingForm.style.display = 'block'; // Allow removing previous vote and adding new
                 ratingHeading.style.display = 'block';
-                console.log('Vote - Form shown for editing existing vote for teacher', teacherId);
+                console.log('Vote - Form shown for updating vote for teacher', teacherId);
             } else {
                 ratingForm.style.display = 'block';
                 ratingHeading.style.display = 'block';
@@ -112,6 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('teacher-bio').textContent = 'No bio available due to error.';
                 document.getElementById('teacher-summary').textContent = 'No summary available due to error.';
                 document.getElementById('avg-rating').innerHTML = '☆☆☆☆☆ (0)';
+                document.getElementById('all-reviews').innerHTML = '<p>No reviews available due to error.</p>';
             }
             const ratingForm = document.getElementById('rating-form');
             const ratingHeading = document.getElementById('rating-heading');
@@ -172,13 +194,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             let hasVoted = votedArray.includes(teacherId.toString());
 
             if (hasVoted) {
-                // Edit existing vote
+                // Remove the previous vote for this teacher before adding the new one
                 await fetch(`/api/ratings/${teacherId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ rating: selectedRating, review })
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
                 });
-                showModal('Your previous vote has been updated.');
+                // Update the cookie to keep the teacher ID (since they’re still voting)
+                setCookie('votedTeachers', votedArray.join(','), 365);
+                showModal('Your previous vote has been removed, and your new vote has been recorded.');
             } else {
                 // Add new vote
                 votedArray.push(teacherId.toString());

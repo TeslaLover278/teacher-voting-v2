@@ -62,6 +62,7 @@ body {
     font-size: 2em;
     color: #000000; /* Black text for title */
     margin-bottom: 20px;
+    display: block; /* Ensure visibility */
 }
 .teacher-content {
     display: flex;
@@ -91,6 +92,7 @@ body {
     color: #000000; /* Black text for bio/summary */
     text-align: justify; /* Justify text for paragraph-like appearance */
     display: block; /* Ensure visibility, in case of any override */
+    overflow-wrap: break-word; /* Handle long text */
 }
 #teacher-summary {
     font-style: italic; /* Italicize summary for distinction */
@@ -148,9 +150,11 @@ button:hover {
     padding: 10px;
     margin-bottom: 10px;
     background-color: #FFFFFF; /* White background for reviews */
+    display: block; /* Ensure visibility */
 }
 .all-reviews {
     margin-top: 20px;
+    display: block; /* Ensure visibility */
 }
 .review-entry {
     border: 1px solid #00B7D1; /* Teal border for review entries */
@@ -158,14 +162,17 @@ button:hover {
     margin-bottom: 10px;
     background-color: #FFFFFF; /* White background for review entries */
     border-radius: 8px;
+    display: block; /* Ensure visibility */
 }
 .review-entry p {
     margin: 5px 0;
     color: #000000; /* Black text for reviews */
+    display: block; /* Ensure visibility */
 }
 .review-entry hr {
     border: 1px solid #00B7D1; /* Teal border for separator */
     margin: 10px 0;
+    display: block; /* Ensure visibility */
 }
 footer {
     text-align: center;
