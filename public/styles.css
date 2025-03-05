@@ -148,6 +148,10 @@ button:hover {
     margin-bottom: 10px;
     background-color: #FFFFFF; /* White background for reviews */
 }
+#avg-rating, #vote-count {
+    color: #000000; /* Ensure black text for readability */
+    font-weight: bold; /* Make it stand out */
+}
 footer {
     text-align: center;
     margin-top: 20px;

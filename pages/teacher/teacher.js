@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await fetch(`/api/ratings/${teacherId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ rating: selectedRating, review })
+                    body: JSON.stringify({ rating: selectedRating, review: review || '' })
                 });
                 showModal('Your vote has been updated.');
             } else {
@@ -190,15 +190,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 showNotification('Your response has been recorded.');
             }
 
+            // Reload teacher data to update ratings
             await loadTeacher();
             document.getElementById('rating-form').style.display = 'none';
             document.getElementById('rating-heading').style.display = 'none';
         } catch (error) {
-            console.error('Vote - Error:', error.message);
+            console.error('Vote - Error:', error.message, error.stack); // Added stack trace for debugging
             if (error.message.includes('HTTP error')) {
                 showModal('Error submitting your rating. Please try again.');
             }
-            // Removed the "An unexpected error occurred..." modal to prevent false positives
         }
     });
 
@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Uncomment below in browser console for testing
     // clearVotesForTesting();
 
-    await loadTeacher().catch(error => console.error('LoadTeacher - Initial load error:', error.message));
+    await loadTeacher().catch(error => console.error('LoadTeacher - Initial load error:', error.message, error.stack));
 });
 
 function setCookie(name, value, days) {

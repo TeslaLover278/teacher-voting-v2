@@ -185,11 +185,14 @@ app.post('/api/ratings', (req, res) => {
     const votedArray = cookieStr ? cookieStr.split(',').map(id => id.trim()).filter(Boolean) : [];
 
     if (votedArray.includes(teacherId.toString())) {
-        // Edit existing vote
-        ratings = ratings.filter(r => r.teacher_id !== teacherId); // Remove old vote
-        ratings.push(newRating); // Add new vote
-        setCookie(res, 'votedTeachers', votedArray.join(','), 365);
-        console.log('Server - Updated rating for teacher:', teacher_id);
+        // Edit existing vote using PUT
+        const updateResponse = await fetch(`/api/ratings/${teacherId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rating: parseInt(rating), review: review || '' })
+        });
+        if (!updateResponse.ok) throw new Error(`HTTP error updating vote! status: ${updateResponse.status}`);
+        console.log('Server - Updated rating for teacher via POST:', teacher_id);
         console.log('Server - New rating:', rating);
     } else {
         // Add new vote
@@ -203,15 +206,16 @@ app.post('/api/ratings', (req, res) => {
     res.json({ message: 'Rating submitted!' });
 });
 
-// Update a rating (for admin or user, but here for completeness—fix for user updates)
+// Update a rating (for user updates, fixed to handle both new and existing votes correctly)
 app.put('/api/ratings/:teacherId', (req, res) => {
     const teacherId = parseInt(req.params.teacherId);
     const { rating, review } = req.body;
     const voteIndex = ratings.findIndex(r => r.teacher_id === teacherId);
+
     if (voteIndex === -1) {
-        // If no vote exists, treat it as a new vote (this fixes the error on second vote)
+        // If no vote exists, add a new vote (this should not happen via user PUT, but handle it for robustness)
         ratings.push({ teacher_id: teacherId, rating: parseInt(rating), review: review || '' });
-        console.log('Server - Added new rating for teacher (via PUT):', teacherId);
+        console.log('Server - Added new rating for teacher (via PUT, unexpected):', teacherId);
         console.log('Server - New rating:', rating);
         res.json({ message: 'Rating added successfully!' });
     } else {
