@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const teacher = await response.json();
             
             console.log('LoadTeacher - Fetched data for teacher', teacherId);
-            console.log('LoadTeacher - Avg rating:', teacher.avg_rating || 'No ratings', 'Votes:', teacher.rating_count);
+            console.log('LoadTeacher - Avg rating:', teacher.avg_rating || 'No ratings', 'Votes:', teacher.rating_count, 'Raw ratings:', teacher.ratings);
 
             // Use a local file path for the teacher photo based on teacher ID, with fallback
             const teacherPhotoPath = `/images/teacher${teacher.id}.jpg`;

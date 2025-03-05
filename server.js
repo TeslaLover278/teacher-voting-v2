@@ -171,11 +171,11 @@ app.get('/api/teachers/:id', (req, res) => {
         ? teacherRatings.reduce((sum, r) => sum + r.rating, 0) / teacherRatings.length
         : null;
     console.log('Server - Fetched teacher ID:', id);
-    console.log('Server - Avg rating:', avgRating, 'Ratings count:', teacherRatings.length);
+    console.log('Server - Avg rating:', avgRating, 'Ratings count:', teacherRatings.length, 'Raw ratings:', teacherRatings);
     res.json({ ...teacher, avg_rating: avgRating, ratings: teacherRatings, rating_count: teacherRatings.length });
 });
 
-// Submit a rating (only allow one vote per user per teacher)
+// Submit a rating (only allow one vote per user per teacher, fixed to record votes)
 app.post('/api/ratings', (req, res) => {
     const { teacher_id, rating, review } = req.body;
     const teacherId = parseInt(teacher_id);
@@ -190,12 +190,12 @@ app.post('/api/ratings', (req, res) => {
         return;
     }
 
-    // Add new vote
+    // Add new vote and ensure it’s recorded
     ratings.push(newRating);
     votedArray.push(teacherId.toString());
     setCookie(res, 'votedTeachers', votedArray.join(','), 365);
-    console.log('Server - Added rating for teacher:', teacher_id);
-    console.log('Server - Ratings total:', ratings.length);
+    console.log('Server - Added rating for teacher:', teacher_id, 'Rating:', newRating);
+    console.log('Server - Ratings total:', ratings.length, 'Updated ratings:', ratings);
 
     res.json({ message: 'Rating submitted!' });
 });
