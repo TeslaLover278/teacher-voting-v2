@@ -4,16 +4,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadTeacher() {
         try {
-            console.log('Debug - DOM Loaded, starting loadTeacher for teacherId:', teacherId);
             const response = await fetch(`/api/teachers/${teacherId}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const teacher = await response.json();
             
-            console.log('Debug - Fetched teacher data:', teacher);
+            console.log('LoadTeacher - Fetched data for teacher', teacherId);
+            console.log('LoadTeacher - Avg rating:', teacher.avg_rating || 'No ratings');
 
-            document.getElementById('teacher-photo').src = `/images/teacher${teacher.id}.jpg`;
+            // Use a local file path for the teacher photo based on teacher ID
+            const teacherPhotoPath = `/images/teacher${teacher.id}.jpg`;
+            document.getElementById('teacher-photo').src = teacherPhotoPath;
             document.getElementById('teacher-name').textContent = teacher.name;
             document.getElementById('teacher-bio').textContent = teacher.bio;
             const avgStars = teacher.avg_rating ? `${'★'.repeat(Math.round(teacher.avg_rating))}${'☆'.repeat(5 - Math.round(teacher.avg_rating))}` : 'No ratings yet';
@@ -21,13 +21,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const table = document.getElementById('teacher-classes');
             table.innerHTML = ''; // Clear existing table
-            for (let i = 0; i < 2; i++) {
-                const row = table.insertRow();
-                for (let j = 0; j < 4; j++) {
-                    const cell = row.insertCell();
-                    const classIndex = i * 4 + j;
-                    cell.textContent = teacher.classes[classIndex] || '';
-                }
+            
+            // Top row: Blocks 1–4
+            const topRow = table.insertRow();
+            for (let i = 1; i <= 4; i++) {
+                const cell = topRow.insertCell();
+                cell.textContent = `Block ${i}`;
+            }
+
+            // Bottom row: Teacher's schedule (classes)
+            const bottomRow = table.insertRow();
+            for (let i = 0; i < 4; i++) {
+                const cell = bottomRow.insertCell();
+                cell.textContent = teacher.classes[i] || 'N/A';
             }
 
             const reviewsDiv = document.getElementById('reviews');
@@ -39,40 +45,31 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             const cookieStr = getCookie('votedTeachers') || '';
-            console.log('Debug - Raw votedTeachers cookie:', cookieStr);
             const votedArray = cookieStr ? cookieStr.split(',').map(id => id.trim()).filter(Boolean) : [];
-            console.log('Debug - Parsed votedArray:', votedArray, 'for teacherId:', teacherId);
-
-            // Only hide the form if THIS user has voted for THIS teacher
             const hasVoted = votedArray.includes(teacherId.toString());
-            console.log('Debug - Has voted for teacher', teacherId, ':', hasVoted);
 
             const ratingForm = document.getElementById('rating-form');
             const ratingHeading = document.getElementById('rating-heading');
             if (hasVoted) {
                 ratingForm.style.display = 'none';
                 ratingHeading.style.display = 'none';
-                console.log('Debug - Hiding form for teacher', teacherId, 'due to prior personal vote');
+                console.log('Vote - Form hidden for teacher', teacherId);
             } else {
                 ratingForm.style.display = 'block';
                 ratingHeading.style.display = 'block';
-                console.log('Debug - Showing form for teacher', teacherId, 'as no prior personal vote found');
+                console.log('Vote - Form shown for teacher', teacherId);
             }
 
-            // Logo click functionality (navigates to homepage)
             document.querySelector('.logo').addEventListener('click', () => {
                 window.location.href = '/';
             });
         } catch (error) {
-            console.error('Debug - Error loading teacher:', error);
-            // Only show alert if the error is critical (e.g., network or server error)
+            console.error('LoadTeacher - Error:', error.message);
             if (error.message.includes('HTTP error')) {
                 alert('Error loading teacher data. Please try again.');
             } else {
-                // Log non-HTTP errors but don’t alert the user unless critical
                 alert('An unexpected error occurred. Please try refreshing the page.');
             }
-            // Ensure form is shown as a fallback if data fails to load
             const ratingForm = document.getElementById('rating-form');
             const ratingHeading = document.getElementById('rating-heading');
             ratingForm.style.display = 'block';
@@ -106,48 +103,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         const review = document.getElementById('review').value;
 
         try {
-            console.log('Debug - Submitting vote for teacher', teacherId, 'with rating:', selectedRating, 'review:', review);
+            console.log('Vote - Submitting for teacher', teacherId);
             const response = await fetch('/api/ratings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ teacher_id: teacherId, rating: selectedRating, review })
             });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const result = await response.json();
-            console.log('Debug - Vote submitted, response:', result);
+            console.log('Vote - Submitted, response:', result.message);
 
-            // Use native alert instead of popup
             const choice = confirm("Thank you for your rating! Would you like to stay on this page to read reviews, or return to the main page?");
             if (!choice) {
                 window.location.href = '/';
             } else {
-                // Stay on page, scroll to reviews
                 document.getElementById('reviews').scrollIntoView({ behavior: 'smooth' });
             }
 
-            // Update cookie to track only this teacher's vote, preventing duplicate votes
             const cookieStr = getCookie('votedTeachers') || '';
             const votedArray = cookieStr ? cookieStr.split(',').map(id => id.trim()).filter(Boolean) : [];
-            console.log('Debug - Before vote, cookie string:', cookieStr, 'votedArray:', votedArray, 'for teacher', teacherId);
             if (!votedArray.includes(teacherId.toString())) {
                 votedArray.push(teacherId.toString());
                 setCookie('votedTeachers', votedArray.join(','), 365);
-                console.log('Debug - Added vote for teacher', teacherId, 'New votedArray:', votedArray, 'New cookie:', getCookie('votedTeachers'));
             } else {
-                throw new Error('Duplicate vote detected for this teacher');
+                throw new Error('Duplicate vote detected');
             }
 
-            // Reload teacher data to reflect the new rating
             await loadTeacher();
-
-            // Hide rating form and heading after voting
             document.getElementById('rating-form').style.display = 'none';
             document.getElementById('rating-heading').style.display = 'none';
         } catch (error) {
-            console.error('Debug - Error submitting rating:', error);
-            if (error.message === 'Duplicate vote detected for this teacher') {
+            console.error('Vote - Error:', error.message);
+            if (error.message === 'Duplicate vote detected') {
                 alert("You have already rated this teacher. Your rating remains unchanged.");
             } else if (error.message.includes('HTTP error')) {
                 alert('Error submitting your rating. Please try again.');
@@ -157,16 +144,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Function to clear cookies for testing (optional, comment out for production)
     function clearVotesForTesting() {
-        setCookie('votedTeachers', '', -1); // Expires immediately
-        console.log('Debug - Votes cleared for testing');
+        setCookie('votedTeachers', '', -1);
+        console.log('Vote - Cookies cleared for testing');
     }
 
-    // Uncomment the line below in the browser console or script to reset votes for testing
+    // Uncomment below in browser console for testing
     // clearVotesForTesting();
 
-    await loadTeacher().catch(error => console.error('Debug - Error in loadTeacher:', error));
+    await loadTeacher().catch(error => console.error('LoadTeacher - Initial load error:', error.message));
 });
 
 function setCookie(name, value, days) {
