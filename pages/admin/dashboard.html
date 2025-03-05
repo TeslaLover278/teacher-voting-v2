@@ -12,19 +12,25 @@
         <h1 class="header-title">Admin Dashboard</h1>
         <button class="admin-btn" onclick="window.location.href='/admin/login.html'">Admin</button>
     </header>
-    <div class="teacher-profile-container" style="margin-top: 80px;">
-        <h2>Manage Votes</h2>
-        <div id="votes-list"></div>
-        <h2>Add New Teacher</h2>
-        <form id="teacher-form">
-            <input type="text" name="name" placeholder="Teacher Name" required>
-            <input type="text" name="bio" placeholder="Bio" required>
-            <input type="text" name="classes" placeholder="Classes (comma-separated)" required>
-            <button type="submit">Add Teacher</button>
-        </form>
-        <h2>Manage Teachers</h2>
-        <div id="teachers-list"></div>
-        <button id="logout-btn">Logout</button>
+    <div class="admin-container" style="margin-top: 80px; padding: 20px;">
+        <div class="admin-section">
+            <h2>Manage Votes</h2>
+            <div id="votes-list" class="admin-list"></div>
+        </div>
+        <div class="admin-section">
+            <h2>Add New Teacher</h2>
+            <form id="teacher-form" class="admin-form">
+                <input type="text" name="name" placeholder="Teacher Name" required>
+                <input type="text" name="bio" placeholder="Bio" required>
+                <input type="text" name="classes" placeholder="Classes (comma-separated)" required>
+                <button type="submit">Add Teacher</button>
+            </form>
+        </div>
+        <div class="admin-section">
+            <h2>Manage Teachers</h2>
+            <div id="teachers-list" class="admin-list"></div>
+        </div>
+        <button id="logout-btn" class="admin-btn logout-btn">Logout</button>
     </div>
     <script>
         const token = localStorage.getItem('adminToken');
@@ -42,10 +48,12 @@
                 const votes = await response.json();
                 const votesList = document.getElementById('votes-list');
                 votesList.innerHTML = votes.map(vote => `
-                    <div class="vote-item">
+                    <div class="admin-item">
                         <p>Teacher ID: ${vote.teacher_id}, Rating: ${vote.rating}, Review: ${vote.review || 'No review'}</p>
-                        <button onclick="modifyVote(${vote.teacher_id}, ${vote.rating}, '${vote.review || ''}')">Modify</button>
-                        <button onclick="deleteVote(${vote.teacher_id})">Delete</button>
+                        <div class="admin-actions">
+                            <button onclick="modifyVote(${vote.teacher_id}, ${vote.rating}, '${vote.review || ''}')">Modify</button>
+                            <button onclick="deleteVote(${vote.teacher_id})">Delete</button>
+                        </div>
                     </div>
                 `).join('');
             } catch (error) {
@@ -63,9 +71,11 @@
                 const teachers = await response.json();
                 const teachersList = document.getElementById('teachers-list');
                 teachersList.innerHTML = teachers.map(teacher => `
-                    <div class="vote-item">
-                        <p>Teacher ID: ${teacher.id}, Name: ${teacher.name}, Bio: ${teacher.bio}</p>
-                        <button onclick="deleteTeacher(${teacher.id})">Delete</button>
+                    <div class="admin-item">
+                        <p>ID: ${teacher.id}, Name: ${teacher.name}, Bio: ${teacher.bio}</p>
+                        <div class="admin-actions">
+                            <button onclick="deleteTeacher(${teacher.id})">Delete</button>
+                        </div>
                     </div>
                 `).join('');
             } catch (error) {
@@ -164,7 +174,7 @@
 
         document.getElementById('logout-btn').addEventListener('click', () => {
             localStorage.removeItem('adminToken');
-            window.location.href = '/admin/login.html';
+            window.location.href = '/'; // Return to main page instead of login
         });
 
         loadVotes();

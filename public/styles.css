@@ -38,13 +38,14 @@ body {
     text-align: center; /* Center the title */
 }
 .admin-btn {
-    padding: 10px;
+    padding: 10px 15px; /* Increased padding for visibility */
     background-color: #00B7D1; /* Teal for admin button */
     color: #FFFFFF; /* White text */
     border: none;
     cursor: pointer;
     border-radius: 4px;
-    margin-left: 10px; /* Space from title */
+    margin-left: 20px; /* Increased margin to stick out more from the side */
+    margin-right: 10px; /* Space from edge */
 }
 .admin-btn:hover {
     background-color: #0078D4; /* Blue for hover state */
@@ -60,7 +61,11 @@ body {
     margin-bottom: 20px;
     display: flex;
     gap: 10px;
-    margin-top: 20px; /* Reduced to account for header, adjust if needed */
+    margin-top: 20px; /* Reduced to account for header, ensure visibility */
+    padding: 10px; /* Add padding for visibility */
+    background-color: #FFFFFF; /* White background for controls */
+    border: 1px solid #00B7D1; /* Teal border for controls */
+    border-radius: 8px;
 }
 #search-bar, #sort-select {
     padding: 5px;
@@ -73,6 +78,7 @@ body {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
+    padding: 10px; /* Add padding for visibility */
 }
 .teacher-card {
     text-align: center;
@@ -186,63 +192,60 @@ footer a:hover {
 }
 
 /* Admin-specific styles */
-.vote-item {
-    border: 1px solid #00B7D1;
-    padding: 10px;
-    margin-bottom: 10px;
-    background-color: #FFFFFF;
+.admin-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #FFFFFF; /* White background for admin container */
+    border: 1px solid #00B7D1; /* Teal border for admin container */
     border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-.vote-item button {
-    padding: 5px 10px;
-    margin-left: 10px;
-    background-color: #00B7D1;
-    color: #FFFFFF;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
-}
-.vote-item button:hover {
-    background-color: #0078D4;
-}
-#admin-login-form, #votes-list, #teacher-form, #teachers-list {
-    max-width: 400px;
-    margin: 20px auto;
+.admin-section {
     padding: 20px;
-    background-color: #FFFFFF;
-    border: 1px solid #00B7D1;
-    border-radius: 8px;
+    border-bottom: 1px solid #00B7D1; /* Teal border between sections */
 }
-#admin-login-form label, #admin-login-form input, #teacher-form input {
-    display: block;
+.admin-section:last-child {
+    border-bottom: none; /* Remove border from last section */
+}
+.admin-section h2 {
+    margin-top: 0;
+    color: #000000; /* Black text for headers */
+}
+.admin-list, .admin-form {
+    max-width: 600px;
+    margin: 0 auto 20px;
+}
+.admin-item {
+    border: 1px solid #00B7D1;
+    padding: 10px;
     margin-bottom: 10px;
+    background-color: #FFFFFF;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
-#admin-login-form input, #teacher-form input {
-    width: 100%;
-    padding: 5px;
-    border: 1px solid #00B7D1;
-    border-radius: 4px;
+.admin-item p {
+    margin: 0;
+    flex-grow: 1;
 }
-#admin-login-form button, #teacher-form button {
-    padding: 10px;
+.admin-actions {
+    display: flex;
+    gap: 10px;
+}
+.admin-item button {
+    padding: 5px 10px;
     background-color: #00B7D1;
     color: #FFFFFF;
     border: none;
     cursor: pointer;
     border-radius: 4px;
 }
-#admin-login-form button:hover, #teacher-form button:hover {
+.admin-item button:hover {
     background-color: #0078D4;
 }
-#logout-btn {
-    padding: 10px;
-    background-color: #00B7D1;
-    color: #FFFFFF;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
-    margin-top: 20px;
-}
-#logout-btn:hover {
-    background-color: #0078D4;
+.logout-btn {
+    display: block;
+    margin: 20px auto;
+    width: 120px; /* Fixed width for logout button */
 }
