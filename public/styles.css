@@ -5,11 +5,24 @@ body {
     padding: 20px;
     background-color: #E6F0F8; /* Light gray-blue background from logo */
     color: #000000; /* Black text for readability */
+    position: relative; /* For absolute positioning of logo */
+}
+.logo {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 100px; /* Adjust size as needed for your logo */
+    height: auto;
+    cursor: pointer;
+}
+.logo:hover {
+    opacity: 0.8;
 }
 .controls {
     margin-bottom: 20px;
     display: flex;
     gap: 10px;
+    margin-top: 120px; /* Adjust to avoid overlap with logo */
 }
 #search-bar, #sort-select {
     padding: 5px;
@@ -108,17 +121,20 @@ button:hover {
     margin-bottom: 10px;
     background-color: #FFFFFF; /* White background for reviews */
 }
-#home-button {
-    margin-bottom: 20px;
-    padding: 10px 20px;
-    background-color: #00B7D1; /* Teal for home button */
-    color: #FFFFFF; /* White text */
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
+footer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #FFFFFF; /* White background for footer */
+    border-top: 1px solid #00B7D1; /* Teal border for footer */
+    color: #000000; /* Black text for footer */
 }
-#home-button:hover {
-    background-color: #0078D4; /* Blue for hover state */
+footer a {
+    color: #00B7D1; /* Teal for link */
+    text-decoration: underline;
+}
+footer a:hover {
+    color: #0078D4; /* Blue for hover state */
 }
 #reviews a {
     margin-right: 10px;
