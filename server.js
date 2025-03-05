@@ -73,7 +73,9 @@ app.get('/api/teachers/:id', (req, res) => {
 // Submit a rating
 app.post('/api/ratings', (req, res) => {
     const { teacher_id, rating, review } = req.body;
-    ratings.push({ teacher_id: parseInt(teacher_id), rating: parseInt(rating), review });
+    const newRating = { teacher_id: parseInt(teacher_id), rating: parseInt(rating), review };
+    ratings.push(newRating);
+    console.log(`New rating added for teacher ${teacher_id}:`, newRating); // Debug log
     res.json({ message: 'Rating submitted!' });
 });
 

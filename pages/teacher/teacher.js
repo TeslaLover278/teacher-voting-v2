@@ -28,10 +28,14 @@ async function loadTeacher() {
         reviewsDiv.appendChild(div);
     });
 
-    const votedTeachers = getCookie('votedTeachers') ? getCookie('votedTeachers').split(',').filter(Boolean) : [];
-    if (votedTeachers.includes(teacherId.toString())) {
+    const votedTeachers = getCookie('votedTeachers') || '';
+    const votedArray = votedTeachers ? votedTeachers.split(',').filter(Boolean) : [];
+    if (votedArray.includes(teacherId.toString())) {
         document.getElementById('rating-form').style.display = 'none';
         document.getElementById('rating-heading').style.display = 'none'; // Hide "Your Rating" heading
+    } else {
+        document.getElementById('rating-form').style.display = 'block';
+        document.getElementById('rating-heading').style.display = 'block';
     }
 
     // Logo click functionality (navigates to homepage)
@@ -81,12 +85,11 @@ document.getElementById('rating-form').addEventListener('submit', async (e) => {
     }
 
     // Update cookie to track only this teacher's vote, allowing voting on others by different users
-    let votedTeachers = getCookie('votedTeachers') ? getCookie('votedTeachers').split(',').filter(Boolean) : [];
-    // Reset cookie if testing (optional, comment out for production)
-    // votedTeachers = []; // Uncomment to reset for testing, then comment out after testing
-    if (!votedTeachers.includes(teacherId.toString())) {
-        votedTeachers.push(teacherId.toString());
-        setCookie('votedTeachers', votedTeachers.join(','), 365);
+    let votedTeachers = getCookie('votedTeachers') || '';
+    let votedArray = votedTeachers ? votedTeachers.split(',').filter(Boolean) : [];
+    if (!votedArray.includes(teacherId.toString())) {
+        votedArray.push(teacherId.toString());
+        setCookie('votedTeachers', votedArray.join(','), 365);
     } else {
         // Allow re-voting by notifying the user and preventing duplicate votes
         alert("You have already rated this teacher. Your rating remains unchanged.");
@@ -100,6 +103,15 @@ document.getElementById('rating-form').addEventListener('submit', async (e) => {
     document.getElementById('rating-form').style.display = 'none';
     document.getElementById('rating-heading').style.display = 'none';
 });
+
+// Function to clear cookies for testing (optional, comment out for production)
+function clearVotesForTesting() {
+    setCookie('votedTeachers', '', -1); // Expires immediately
+    console.log('Votes cleared for testing');
+}
+
+// Uncomment the line below in the browser console or script to reset votes for testing
+// clearVotesForTesting();
 
 loadTeacher();
 
