@@ -176,7 +176,7 @@ app.get('/api/teachers/:id', (req, res) => {
 });
 
 // Submit or update a rating (edit past vote if already voted)
-app.post('/api/ratings', (req, res) => {
+app.post('/api/ratings', async (req, res) => {
     const { teacher_id, rating, review } = req.body;
     const teacherId = parseInt(teacher_id);
     const newRating = { teacher_id, rating: parseInt(rating), review: review || '' };
@@ -186,7 +186,7 @@ app.post('/api/ratings', (req, res) => {
 
     if (votedArray.includes(teacherId.toString())) {
         // Edit existing vote using PUT
-        const updateResponse = await fetch(`/api/ratings/${teacherId}`, {
+        const updateResponse = fetch(`/api/ratings/${teacherId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ rating: parseInt(rating), review: review || '' })
