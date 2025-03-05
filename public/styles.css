@@ -56,49 +56,40 @@ body {
 .teacher-profile-container {
     margin-left: 0; /* Reset margin since header handles positioning */
     margin-top: 100px; /* Increased to move content down further, adjust if needed */
-    display: block; /* Ensure visibility */
 }
 #teacher-title {
     text-align: center;
     font-size: 2em;
     color: #000000; /* Black text for title */
     margin-bottom: 20px;
-    display: block; /* Ensure visibility */
 }
 .teacher-content {
     display: flex;
     gap: 20px;
     justify-content: space-between;
-    display: block; /* Ensure visibility */
 }
 .teacher-left {
     flex: 1;
     max-width: 300px; /* Limit width of left section */
-    display: block; /* Ensure visibility */
 }
 .teacher-right {
     flex: 2;
     max-width: 600px; /* Limit width of right section */
-    display: block; /* Ensure visibility */
 }
 .teacher-header {
     display: flex;
     align-items: center;
     gap: 20px;
-    display: block; /* Ensure visibility */
 }
 #teacher-photo {
     width: 250px; /* Increased width for larger photo */
     height: 250px; /* Increased height to maintain aspect ratio */
     object-fit: contain; /* Maintain aspect ratio, scale down if larger */
-    display: block; /* Ensure visibility */
 }
 #teacher-bio, #teacher-summary {
     margin: 20px 0;
     color: #000000; /* Black text for bio/summary */
     text-align: justify; /* Justify text for paragraph-like appearance */
-    display: block; /* Ensure visibility */
-    overflow-wrap: break-word; /* Handle long text */
 }
 #teacher-summary {
     font-style: italic; /* Italicize summary for distinction */
@@ -108,14 +99,12 @@ body {
     border-collapse: collapse;
     margin: 20px 0;
     width: 100%; /* Ensure table fills right section */
-    display: block; /* Ensure visibility */
 }
 #teacher-classes td {
     border: 1px solid #00B7D1; /* Teal border for table */
     padding: 10px;
     width: 120px; /* Adjusted for blocks and schedule layout */
     background-color: #FFFFFF; /* White background for cells */
-    display: block; /* Ensure visibility */
 }
 #rating-form {
     display: flex;
@@ -126,12 +115,10 @@ body {
     padding: 15px;
     border: 1px solid #00B7D1; /* Teal border for form */
     border-radius: 8px;
-    display: block; /* Ensure visibility */
 }
 #star-rating {
     font-size: 24px;
     cursor: pointer;
-    display: block; /* Ensure visibility */
 }
 #star-rating .star:hover,
 #star-rating .star.selected {
@@ -143,7 +130,6 @@ textarea {
     border: 1px solid #00B7D1; /* Teal border for textarea */
     border-radius: 4px;
     background-color: #FFFFFF; /* White background for textarea */
-    display: block; /* Ensure visibility */
 }
 button {
     padding: 10px;
@@ -152,7 +138,6 @@ button {
     border: none;
     cursor: pointer;
     border-radius: 4px;
-    display: block; /* Ensure visibility */
 }
 button:hover {
     background-color: #0078D4; /* Blue for hover state */
@@ -162,7 +147,6 @@ button:hover {
     padding: 10px;
     margin-bottom: 10px;
     background-color: #FFFFFF; /* White background for reviews */
-    display: block; /* Ensure visibility */
 }
 footer {
     text-align: center;
@@ -171,12 +155,10 @@ footer {
     background-color: #FFFFFF; /* White background for footer */
     border-top: 1px solid #00B7D1; /* Teal border for footer */
     color: #000000; /* Black text for footer */
-    display: block; /* Ensure visibility */
 }
 footer a {
     color: #00B7D1; /* Teal for link */
     text-decoration: underline;
-    display: block; /* Ensure visibility */
 }
 footer a:hover {
     color: #0078D4; /* Blue for hover state */
@@ -185,7 +167,6 @@ footer a:hover {
     margin-right: 10px;
     text-decoration: underline;
     color: #00B7D1; /* Teal for links */
-    display: block; /* Ensure visibility */
 }
 #reviews a:hover {
     color: #0078D4; /* Blue for hover state */
@@ -200,7 +181,6 @@ footer a:hover {
     border: 1px solid #00B7D1; /* Teal border for controls */
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for elevation */
-    display: block; /* Ensure visibility */
 }
 #search-bar, #sort-select {
     padding: 5px;
@@ -208,7 +188,6 @@ footer a:hover {
     border: 1px solid #00B7D1; /* Teal border from logo */
     border-radius: 4px;
     background-color: #FFFFFF; /* White background for inputs */
-    display: block; /* Ensure visibility */
 }
 #teacher-grid {
     display: grid;
@@ -220,7 +199,6 @@ footer a:hover {
     border: 1px solid #00B7D1; /* Teal border for grid */
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for elevation */
-    display: block; /* Ensure visibility */
 }
 .teacher-card {
     text-align: center;
@@ -230,24 +208,20 @@ footer a:hover {
     border-radius: 8px;
     border: 1px solid #00B7D1; /* Teal border for cards */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: block; /* Ensure visibility */
 }
 .teacher-card img {
     width: 150px;
     height: 150px;
     border-radius: 10px;
     object-fit: contain; /* Maintain aspect ratio for teacher cards on main page */
-    display: block; /* Ensure visibility */
 }
 .teacher-card p {
     margin: 5px 0;
     font-size: 14px;
     color: #000000; /* Black text for teaching sentence */
-    display: block; /* Ensure visibility */
 }
 .stars {
     font-size: 20px;
-    display: block; /* Ensure visibility */
 }
 .stars.grey {
     color: #ADB5BD; /* Gray for unrated stars */
@@ -261,12 +235,10 @@ footer a:hover {
     border: 1px solid #00B7D1; /* Teal border for admin container */
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: block; /* Ensure visibility */
 }
 .admin-section {
     padding: 20px;
     border-bottom: 1px solid #00B7D1; /* Teal border between sections */
-    display: block; /* Ensure visibility */
 }
 .admin-section:last-child {
     border-bottom: none; /* Remove border from last section */
@@ -274,12 +246,10 @@ footer a:hover {
 .admin-section h2 {
     margin-top: 0;
     color: #000000; /* Black text for headers */
-    display: block; /* Ensure visibility */
 }
 .admin-list, .admin-form {
     max-width: 600px;
     margin: 0 auto 20px;
-    display: block; /* Ensure visibility */
 }
 .admin-item {
     border: 1px solid #00B7D1;
@@ -290,17 +260,14 @@ footer a:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    display: block; /* Ensure visibility */
 }
 .admin-item p {
     margin: 0;
     flex-grow: 1;
-    display: block; /* Ensure visibility */
 }
 .admin-actions {
     display: flex;
     gap: 10px;
-    display: block; /* Ensure visibility */
 }
 .admin-item button {
     padding: 5px 10px;
@@ -309,7 +276,6 @@ footer a:hover {
     border: none;
     cursor: pointer;
     border-radius: 4px;
-    display: block; /* Ensure visibility */
 }
 .admin-item button:hover {
     background-color: #0078D4;
@@ -324,7 +290,6 @@ footer a:hover {
     border: none;
     cursor: pointer;
     border-radius: 4px;
-    display: block; /* Ensure visibility */
 }
 .logout-btn:hover {
     background-color: #0078D4; /* Blue for hover state */
@@ -340,7 +305,6 @@ footer a:hover {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
     z-index: 1001; /* Above header */
-    display: block; /* Ensure visibility */
 }
 .modal-content {
     background-color: #FFFFFF; /* White background */
@@ -352,12 +316,10 @@ footer a:hover {
     max-width: 400px; /* Limit width for readability */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
     text-align: center;
-    display: block; /* Ensure visibility */
 }
 #modal-message {
     color: #000000; /* Black text */
     margin-bottom: 20px;
-    display: block; /* Ensure visibility */
 }
 .modal-btn {
     padding: 10px 20px;
@@ -367,7 +329,6 @@ footer a:hover {
     cursor: pointer;
     border-radius: 4px;
     margin: 0 5px; /* Space between Yes/No buttons if used */
-    display: block; /* Ensure visibility */
 }
 .modal-btn:hover {
     background-color: #0078D4; /* Blue for hover state */
@@ -386,5 +347,4 @@ footer a:hover {
     border-radius: 4px;
     z-index: 1002; /* Above header and modal */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-    display: block; /* Ensure visibility */
 }

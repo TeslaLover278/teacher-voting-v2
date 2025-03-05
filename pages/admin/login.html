@@ -10,20 +10,22 @@
     <header class="site-header">
         <img src="/images/logo.png" alt="Teacher Rating Logo" class="logo" onclick="window.location.href='/'">
         <h1 class="header-title">Admin Login</h1>
-        <button class="admin-btn" onclick="window.location.href='/admin/login.html'">Admin</button>
     </header>
-    <div class="teacher-profile-container" style="margin-top: 80px;">
-        <form id="admin-login-form">
+    <div class="admin-container">
+        <h2>Admin Login</h2>
+        <form id="login-form">
             <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
+            <input type="text" id="username" required>
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
+            <input type="password" id="password" required>
             <button type="submit">Login</button>
         </form>
-        <p>Need access? Contact <a href="mailto:reagan.hartney@gmail.com">reagan.hartney@gmail.com</a>.</p>
     </div>
+    <footer>
+        <p>Missing Teacher? Contact <a href="mailto:reagan.hartney@gmail.com">reagan.hartney@gmail.com</a> to add a teacher!</p>
+    </footer>
     <script>
-        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
@@ -34,14 +36,11 @@
                     body: JSON.stringify({ username, password })
                 });
                 if (!response.ok) throw new Error('Login failed');
-                const result = await response.json();
-                if (result.token) {
-                    localStorage.setItem('adminToken', result.token);
-                    window.location.href = '/admin/dashboard.html';
-                }
+                const data = await response.json();
+                localStorage.setItem('adminToken', data.token);
+                window.location.href = '/admin/dashboard.html';
             } catch (error) {
                 alert('Invalid credentials. Please try again.');
-                console.error('Admin Login - Error:', error);
             }
         });
     </script>

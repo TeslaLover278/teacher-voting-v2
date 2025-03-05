@@ -10,199 +10,125 @@
     <header class="site-header">
         <img src="/images/logo.png" alt="Teacher Rating Logo" class="logo" onclick="window.location.href='/'">
         <h1 class="header-title">Admin Dashboard</h1>
-        <button class="admin-btn" onclick="window.location.href='/admin/login.html'">Admin</button>
+        <button class="logout-btn" onclick="logout()">Logout</button>
     </header>
-    <div class="admin-container" style="margin-top: 80px; padding: 20px;">
+    <div class="admin-container">
         <div class="admin-section">
-            <h2>Manage Votes</h2>
-            <div id="votes-list" class="admin-list"></div>
-        </div>
-        <div class="admin-section">
-            <h2>Add New Teacher</h2>
-            <form id="teacher-form" class="admin-form">
-                <input type="text" name="name" placeholder="Teacher Name" required>
-                <input type="text" name="bio" placeholder="Bio" required>
-                <input type="text" name="classes" placeholder="Classes (comma-separated)" required>
+            <h2>Manage Teachers</h2>
+            <div class="admin-list" id="teacher-list"></div>
+            <form id="add-teacher-form">
+                <label for="teacher-name">Name:</label>
+                <input type="text" id="teacher-name" required>
+                <label for="teacher-bio">Bio:</label>
+                <textarea id="teacher-bio" required></textarea>
+                <label for="teacher-summary">Summary:</label>
+                <textarea id="teacher-summary" required></textarea>
+                <label for="teacher-classes">Classes (comma-separated):</label>
+                <input type="text" id="teacher-classes">
                 <button type="submit">Add Teacher</button>
             </form>
         </div>
         <div class="admin-section">
-            <h2>Manage Teachers</h2>
-            <div id="teachers-list" class="admin-list"></div>
-        </div>
-        <button id="logout-btn" class="admin-btn logout-btn">Logout</button>
-    </div>
-
-    <!-- Modal for on-page popups -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <p id="modal-message"></p>
-            <button id="modal-close" class="modal-btn">OK</button>
+            <h2>Manage Votes</h2>
+            <div class="admin-list" id="vote-list"></div>
         </div>
     </div>
-
+    <footer>
+        <p>Missing Teacher? Contact <a href="mailto:reagan.hartney@gmail.com">reagan.hartney@gmail.com</a> to add a teacher!</p>
+    </footer>
     <script>
         const token = localStorage.getItem('adminToken');
-        if (!token) {
-            window.location.href = '/admin/login.html';
-            return;
-        }
-
-        // Modal functions
-        function showModal(message) {
-            const modal = document.getElementById('modal');
-            const modalMessage = document.getElementById('modal-message');
-            modalMessage.textContent = message;
-            modal.style.display = 'block';
-        }
-
-        function hideModal() {
-            const modal = document.getElementById('modal');
-            modal.style.display = 'none';
-        }
-
-        document.getElementById('modal-close').addEventListener('click', hideModal);
-
-        async function loadVotes() {
-            try {
-                const response = await fetch('/api/admin/votes', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!response.ok) throw new Error('Failed to load votes');
-                const votes = await response.json();
-                const votesList = document.getElementById('votes-list');
-                votesList.innerHTML = votes.map(vote => `
-                    <div class="admin-item">
-                        <p>Teacher ID: ${vote.teacher_id}, Rating: ${vote.rating}, Review: ${vote.review || 'No review'}</p>
-                        <div class="admin-actions">
-                            <button onclick="modifyVote(${vote.teacher_id}, ${vote.rating}, '${vote.review || ''}')">Modify</button>
-                            <button onclick="deleteVote(${vote.teacher_id})">Delete</button>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (error) {
-                showModal('Error loading votes. Please try again.');
-                console.error('Admin Dashboard - Error:', error);
-            }
-        }
+        if (!token) window.location.href = '/admin/login.html';
 
         async function loadTeachers() {
-            try {
-                const response = await fetch('/api/teachers', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!response.ok) throw new Error('Failed to load teachers');
-                const teachers = await response.json();
-                const teachersList = document.getElementById('teachers-list');
-                teachersList.innerHTML = teachers.map(teacher => `
-                    <div class="admin-item">
-                        <p>ID: ${teacher.id}, Name: ${teacher.name}, Bio: ${teacher.bio}</p>
-                        <div class="admin-actions">
-                            <button onclick="deleteTeacher(${teacher.id})">Delete</button>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (error) {
-                showModal('Error loading teachers. Please try again.');
-                console.error('Admin Dashboard - Error:', error);
-            }
+            const response = await fetch('/api/teachers', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const teachers = await response.json();
+            const list = document.getElementById('teacher-list');
+            list.innerHTML = '';
+            teachers.forEach(teacher => {
+                const item = document.createElement('div');
+                item.className = 'admin-item';
+                item.innerHTML = `<p>${teacher.name}</p><div class="admin-actions"><button onclick="deleteTeacher(${teacher.id})">Delete</button></div>`;
+                list.appendChild(item);
+            });
         }
 
-        async function modifyVote(teacherId, currentRating, currentReview) {
-            const newRating = prompt('Enter new rating (1-5):', currentRating);
-            const newReview = prompt('Enter new review (optional):', currentReview);
-            if (newRating && !isNaN(newRating) && newRating >= 1 && newRating <= 5) {
-                try {
-                    const response = await fetch(`/api/admin/votes/${teacherId}`, {
-                        method: 'PUT',
-                        headers: { 
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ rating: parseInt(newRating), review: newReview || '' })
-                    });
-                    if (!response.ok) throw new Error('Failed to modify vote');
-                    loadVotes();
-                    showModal('Vote modified successfully!');
-                } catch (error) {
-                    showModal('Error modifying vote. Please try again.');
-                    console.error('Admin Dashboard - Modify Error:', error);
+        async function loadVotes() {
+            const response = await fetch('/api/admin/votes', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const votes = await response.json();
+            const list = document.getElementById('vote-list');
+            list.innerHTML = '';
+            votes.forEach(vote => {
+                const teacher = teachers.find(t => t.id === vote.teacher_id);
+                if (teacher) {
+                    const item = document.createElement('div');
+                    item.className = 'admin-item';
+                    item.innerHTML = `<p>${teacher.name} - ${'★'.repeat(vote.rating)}${'☆'.repeat(5 - vote.rating)} - ${vote.review || 'No review'}</p><div class="admin-actions"><button onclick="modifyVote(${vote.teacher_id})">Modify</button><button onclick="deleteVote(${vote.teacher_id})">Delete</button></div>`;
+                    list.appendChild(item);
                 }
-            } else {
-                showModal('Invalid rating. Please enter a number between 1 and 5.');
+            });
+        }
+
+        document.getElementById('add-teacher-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('teacher-name').value;
+            const bio = document.getElementById('teacher-bio').value;
+            const summary = document.getElementById('teacher-summary').value;
+            const classes = document.getElementById('teacher-classes').value.split(',').map(c => c.trim());
+            await fetch('/api/teachers', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, bio, summary, classes })
+            });
+            loadTeachers();
+            e.target.reset();
+        });
+
+        async function modifyVote(teacherId) {
+            const rating = prompt('Enter new rating (1-5):');
+            const review = prompt('Enter new review (optional):');
+            if (rating && !isNaN(rating) && rating >= 1 && rating <= 5) {
+                await fetch(`/api/admin/votes/${teacherId}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rating: parseInt(rating), review })
+                });
+                loadVotes();
             }
         }
 
         async function deleteVote(teacherId) {
-            if (confirm('Are you sure you want to delete this vote?')) { // Keep confirm for admin
-                try {
-                    const response = await fetch(`/api/admin/votes/${teacherId}`, {
-                        method: 'DELETE',
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (!response.ok) throw new Error('Failed to delete vote');
-                    loadVotes();
-                    showModal('Vote deleted successfully!');
-                } catch (error) {
-                    showModal('Error deleting vote. Please try again.');
-                    console.error('Admin Dashboard - Delete Error:', error);
-                }
-            }
-        }
-
-        async function deleteTeacher(teacherId) {
-            if (confirm('Are you sure you want to delete this teacher and all their votes?')) { // Keep confirm for admin
-                try {
-                    const response = await fetch(`/api/admin/teachers/${teacherId}`, {
-                        method: 'DELETE',
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (!response.ok) throw new Error('Failed to delete teacher');
-                    loadTeachers();
-                    loadVotes(); // Refresh votes to remove any associated with this teacher
-                    showModal('Teacher and their votes deleted successfully!');
-                } catch (error) {
-                    showModal('Error deleting teacher. Please try again.');
-                    console.error('Admin Dashboard - Delete Teacher Error:', error);
-                }
-            }
-        }
-
-        document.getElementById('teacher-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = {
-                name: formData.get('name'),
-                bio: formData.get('bio'),
-                classes: formData.get('classes').split(',').map(c => c.trim())
-            };
-            try {
-                const response = await fetch('/api/teachers', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(data)
+            if (confirm('Are you sure you want to delete this vote?')) {
+                await fetch(`/api/admin/votes/${teacherId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (!response.ok) throw new Error('Failed to add teacher');
-                const result = await response.json();
-                loadTeachers();
-                showModal('Teacher added successfully!');
-                e.target.reset();
-            } catch (error) {
-                showModal('Error adding teacher. Please try again.');
-                console.error('Admin Dashboard - Add Teacher Error:', error);
+                loadVotes();
             }
-        });
+        }
 
-        document.getElementById('logout-btn').addEventListener('click', () => {
+        async function deleteTeacher(id) {
+            if (confirm('Are you sure you want to delete this teacher and their votes?')) {
+                await fetch(`/api/admin/teachers/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                loadTeachers();
+                loadVotes();
+            }
+        }
+
+        function logout() {
             localStorage.removeItem('adminToken');
-            window.location.href = '/'; // Return to main page instead of login
-        });
+            window.location.href = '/admin/login.html';
+        }
 
-        loadVotes();
         loadTeachers();
+        loadVotes();
     </script>
 </body>
 </html>
