@@ -76,14 +76,18 @@ body {
     gap: 20px;
 }
 #teacher-photo {
-    width: 200px; /* Fixed width for teacher photo */
-    height: 200px; /* Fixed height to maintain aspect ratio */
+    width: 250px; /* Increased width for larger photo */
+    height: 250px; /* Increased height to maintain aspect ratio */
     object-fit: contain; /* Maintain aspect ratio, scale down if larger */
 }
-#teacher-bio {
+#teacher-bio, #teacher-summary {
     margin: 20px 0;
-    color: #000000; /* Black text for bio */
+    color: #000000; /* Black text for bio/summary */
     text-align: justify; /* Justify text for paragraph-like appearance */
+}
+#teacher-summary {
+    font-style: italic; /* Italicize summary for distinction */
+    margin-top: 10px; /* Space above summary */
 }
 #teacher-classes {
     border-collapse: collapse;
@@ -208,7 +212,7 @@ footer a:hover {
 .teacher-card p {
     margin: 5px 0;
     font-size: 14px;
-    color: #000000; /* Black text for bio/teaching sentence */
+    color: #000000; /* Black text for teaching sentence */
 }
 .stars {
     font-size: 20px;
@@ -322,4 +326,19 @@ footer a:hover {
 }
 .modal-btn:hover {
     background-color: #0078D4; /* Blue for hover state */
+}
+
+/* Notification styles */
+.notification {
+    display: none;
+    position: fixed;
+    top: 80px; /* Below the header */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    background-color: #00B7D1; /* Teal background */
+    color: #FFFFFF; /* White text */
+    border-radius: 4px;
+    z-index: 1002; /* Above header and modal */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
 }

@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const teacherId = urlParams.get('id');
 
-    // Modal functions
+    // Modal and notification functions
     function showModal(message) {
         const modal = document.getElementById('modal');
         const modalMessage = document.getElementById('modal-message');
@@ -13,6 +13,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     function hideModal() {
         const modal = document.getElementById('modal');
         modal.style.display = 'none';
+    }
+
+    function showNotification(message) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.style.display = 'block';
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 5000); // Hide after 5 seconds
     }
 
     document.getElementById('modal-close').addEventListener('click', hideModal);
@@ -40,9 +49,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             document.getElementById('teacher-name').textContent = teacher.name;
             document.getElementById('teacher-bio').textContent = teacher.bio || 'No bio available.';
+            document.getElementById('teacher-summary').textContent = teacher.summary || 'No summary available.';
 
             const avgStars = teacher.avg_rating ? `${'★'.repeat(Math.round(teacher.avg_rating))}${'☆'.repeat(5 - Math.round(teacher.avg_rating))}` : 'No ratings yet';
-            document.getElementById('avg-rating').textContent = avgStars;
+            const voteCount = teacher.rating_count || 0;
+            document.getElementById('avg-rating').innerHTML = `${avgStars} (${voteCount})`;
 
             const table = document.getElementById('teacher-classes');
             table.innerHTML = ''; // Clear existing table
@@ -109,9 +120,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 img.src = '/images/default-teacher.jpg';
                 img.alt = `Default image for teacher ID ${teacherId}`; // Update alt text
             };
-            // Set default name and bio if fetch fails
+            // Set default name, bio, and summary if fetch fails
             document.getElementById('teacher-name').textContent = `Teacher ID ${teacherId}`;
             document.getElementById('teacher-bio').textContent = 'No bio available due to error.';
+            document.getElementById('teacher-summary').textContent = 'No summary available due to error.';
         }
     }
 
@@ -154,14 +166,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await response.json();
             console.log('Vote - Submitted, response:', result.message);
 
-            const stayOnPage = await new Promise((resolve) => {
-                showModalWithChoice("Thank you for your rating! Would you like to stay on this page to read reviews, or return to the main page?", resolve);
-            });
-            if (!stayOnPage) {
-                window.location.href = '/';
-            } else {
-                document.getElementById('reviews').scrollIntoView({ behavior: 'smooth' });
-            }
+            // Remove the yes/no modal and show a non-intrusive notification
+            showNotification('Your response has been recorded.');
 
             const cookieStr = getCookie('votedTeachers') || '';
             const votedArray = cookieStr ? cookieStr.split(',').map(id => id.trim()).filter(Boolean) : [];
@@ -175,7 +181,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             await loadTeacher();
             document.getElementById('rating-form').style.display = 'none';
             document.getElementById('rating-heading').style.display = 'none';
-            showModal('Rating submitted successfully!');
         } catch (error) {
             console.error('Vote - Error:', error.message);
             if (error.message === 'Duplicate vote detected') {
@@ -187,24 +192,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     });
-
-    // Custom modal for yes/no choice (replaces confirm)
-    function showModalWithChoice(message, callback) {
-        const modal = document.getElementById('modal');
-        const modalMessage = document.getElementById('modal-message');
-        modalMessage.innerHTML = `${message}<br><button id="modal-yes" class="modal-btn">Yes</button><button id="modal-no" class="modal-btn">No</button>`;
-        modal.style.display = 'block';
-
-        document.getElementById('modal-yes').addEventListener('click', () => {
-            hideModal();
-            callback(true);
-        }, { once: true });
-
-        document.getElementById('modal-no').addEventListener('click', () => {
-            hideModal();
-            callback(false);
-        }, { once: true });
-    }
 
     function clearVotesForTesting() {
         setCookie('votedTeachers', '', -1);
