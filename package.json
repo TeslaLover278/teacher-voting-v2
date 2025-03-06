@@ -1,14 +1,11 @@
 {
-    "name": "teacher-rating-app",
-    "version": "1.15.0",
-    "description": "A web application to rate teachers",
-    "main": "server.js",
-    "scripts": {
-        "start": "node server.js"
-    },
-    "dependencies": {
-        "express": "^4.18.2"
-    },
-    "author": "Reagan Hartney",
-    "license": "MIT"
+  "name": "teacher-rating-app",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "csv-parse": "^5.5.5"
+  }
 }

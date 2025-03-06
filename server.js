@@ -1,6 +1,7 @@
 const express = require('express');
-const fs = require('fs'); // Add file system module for reading .txt
-const path = require('path'); // Add path module for file paths
+const fs = require('fs');
+const path = require('path');
+const { parse } = require('csv-parse'); // Import csv-parse
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -18,41 +19,62 @@ app.use(express.json());
 
 console.log('Server - Middleware configured...');
 
-// Load teachers from teachers.txt file
+// Load teachers from teachers.csv file
 let teachers = [];
-const teachersFilePath = path.join(__dirname, 'teachers.txt');
+const teachersFilePath = path.join(__dirname, 'teachers.csv');
 
 function loadTeachersFromFile() {
     try {
         if (fs.existsSync(teachersFilePath)) {
-            const fileContent = fs.readFileSync(teachersFilePath, 'utf8');
-            teachers = fileContent.trim().split('\n').map(line => {
-                const [namePart, descriptionPart, bioPart, classesPart, idPart] = line.split('; ');
-                const name = namePart.replace('name: ', '');
-                const description = descriptionPart.replace('description: ', '');
-                const bio = bioPart.replace('bio: ', '');
-                const classes = classesPart.replace('classes: ', '').split(', ');
-                const id = parseInt(idPart.replace('id: ', ''));
-                return { id, name, description, bio, classes };
-            }).sort((a, b) => a.id - b.id); // Sort by ID for consistency
-            console.log('Server - Loaded teachers from file:', teachers.length);
+            const records = [];
+            fs.createReadStream(teachersFilePath)
+                .pipe(parse({ columns: true, trim: true, skip_empty_lines: true }))
+                .on('data', (row) => {
+                    // Ensure all required fields exist and parse them
+                    if (row.name && row.description && row.bio && row.classes && row.id) {
+                        const classes = row.classes.split(',').map(c => c.trim()).filter(c => c); // Split and clean classes
+                        const id = parseInt(row.id, 10); // Parse ID as integer
+                        if (!isNaN(id)) {
+                            records.push({ id, name: row.name, description: row.description, bio: row.bio, classes });
+                        } else {
+                            console.warn('Server - Invalid ID for teacher:', row.name, 'Skipping...');
+                        }
+                    } else {
+                        console.warn('Server - Incomplete data for teacher, skipping:', row);
+                    }
+                })
+                .on('end', () => {
+                    teachers = records.sort((a, b) => a.id - b.id); // Sort by ID for consistency
+                    console.log('Server - Loaded teachers from CSV:', teachers.length);
+                })
+                .on('error', (error) => {
+                    throw new Error(`Error parsing CSV: ${error.message}`);
+                });
         } else {
-            console.log('Server - teachers.txt not found, starting with empty teachers array');
+            console.log('Server - teachers.csv not found, starting with empty teachers array');
             teachers = [];
         }
     } catch (error) {
-        console.error('Server - Error loading teachers from file:', error.message);
+        console.error('Server - Error loading teachers from CSV:', error.message);
         teachers = []; // Fallback to empty array if file fails
     }
 }
 
 loadTeachersFromFile(); // Load teachers on startup
 
-// Save teachers back to file after modifications (for admin actions)
+// Save teachers back to CSV file after modifications (for admin actions)
 function saveTeachersToFile() {
-    const content = teachers.map(t => `name: ${t.name}; description: ${t.description}; bio: ${t.bio}; classes: ${t.classes.join(', ')}; id: ${t.id}`).join('\n');
-    fs.writeFileSync(teachersFilePath, content, 'utf8');
-    console.log('Server - Saved teachers to file');
+    try {
+        const headers = ['id', 'name', 'description', 'bio', 'classes'];
+        const csvContent = [
+            headers.join(','),
+            ...teachers.map(t => `${t.id},${t.name},${t.description.replace(/,/g, ';')},${t.bio.replace(/,/g, ';')},${t.classes.join(',')}`)
+        ].join('\n');
+        fs.writeFileSync(teachersFilePath, csvContent, 'utf8');
+        console.log('Server - Saved teachers to CSV');
+    } catch (error) {
+        console.error('Server - Error saving teachers to CSV:', error.message);
+    }
 }
 
 const ratings = []; // In-memory ratings persist during runtime
@@ -220,7 +242,7 @@ app.post('/api/ratings', (req, res) => {
     res.json({ message: 'Rating submitted!' });
 });
 
-// Add a new teacher (admin-only, now via file)
+// Add a new teacher (admin-only, now via CSV)
 app.post('/api/teachers', authenticateAdmin, (req, res) => {
     const { name, bio, classes, description, id } = req.body;
     if (!name || !bio || !classes || !Array.isArray(classes) || !description || isNaN(id)) {
@@ -228,7 +250,7 @@ app.post('/api/teachers', authenticateAdmin, (req, res) => {
     }
     const newTeacher = { id: parseInt(id), name, description, bio, classes };
     teachers.push(newTeacher);
-    saveTeachersToFile(); // Save to file after adding
+    saveTeachersToFile(); // Save to CSV after adding
     console.log('Server - Added new teacher:', newTeacher.name, 'ID:', newTeacher.id);
     res.json(newTeacher);
 });
@@ -245,7 +267,7 @@ app.delete('/api/admin/teachers/:id', authenticateAdmin, (req, res) => {
         const newRatings = ratings.filter(r => r.teacher_id !== id); // Remove all votes for this teacher
         ratings.length = 0;
         ratings.push(...newRatings);
-        saveTeachersToFile(); // Save to file after deletion
+        saveTeachersToFile(); // Save to CSV after deletion
         console.log('Server - Deleted teacher ID:', id, 'Teachers remaining:', teachers.length);
         res.json({ message: 'Teacher and their votes deleted successfully!' });
     } else {
