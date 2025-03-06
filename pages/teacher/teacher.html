@@ -18,6 +18,7 @@
     <main class="teacher-profile-container">
         <section class="teacher-profile">
             <h2 id="teacher-title" class="teacher-name"></h2>
+            <p id="teacher-room" class="teacher-room"></p> <!-- New room number -->
             <div class="teacher-content">
                 <div class="teacher-left">
                     <div class="teacher-header">
@@ -36,7 +37,7 @@
                             <button type="submit" class="submit-btn">Submit Rating</button>
                         </form>
                         <p id="vote-message" class="vote-message" style="display: none; color: #00B7D1;">You have already voted for this teacher.</p>
-                        <h3 class="average-rating">Average Rating: <span id="avg-rating" class="avg-rating"></span> (<span id="vote-count" class="vote-count"></span> votes)</h3>
+                        <h3 class="average-rating">Average Rating: <span id="avg-rating" class="avg-rating"></span> (<span id="vote-count" class="vote-count"></span>)</h3>
                     </div>
                     <div id="reviews" class="reviews">
                         <p><a href="#reviews" id="read-reviews-link" class="reviews-link">Read Reviews</a> | <a href="/" id="back-home-link" class="back-link">Back to Main Page</a></p>

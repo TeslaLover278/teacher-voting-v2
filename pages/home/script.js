@@ -1,12 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     const teacherGrid = document.getElementById('teacher-grid');
     const searchBar = document.getElementById('search-bar');
-    const tagSearch = document.getElementById('tag-search');
     const sortSelect = document.getElementById('sort-select');
 
-    async function loadTeachers(sort = 'default', direction = 'asc', search = '', tags = '') {
+    async function loadTeachers(sort = 'default', direction = 'asc', search = '') {
         try {
-            const response = await fetch(`/api/teachers?sort=${sort}&direction=${direction}&search=${encodeURIComponent(search)}&tags=${encodeURIComponent(tags)}`);
+            const response = await fetch(`/api/teachers?sort=${sort}&direction=${direction}&search=${encodeURIComponent(search)}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
             const teachers = await response.json();
 
@@ -17,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.innerHTML = `
                     <img src="/images/teacher${teacher.id}.jpg" alt="${teacher.name}" onerror="this.src='/images/default-teacher.jpg'; this.alt='Default image for ${teacher.name}';">
                     <h3>${teacher.name}</h3>
+                    <p>Room: ${teacher.room_number}</p>
                     <p>${teacher.description}</p>
                     <p class="stars">${teacher.avg_rating ? '★'.repeat(Math.round(teacher.avg_rating)) + '☆'.repeat(5 - Math.round(teacher.avg_rating)) : '☆☆☆☆☆'} (${teacher.rating_count || 0})</p>
                     <a href="/teacher/teacher.html?id=${teacher.id}" class="view-profile">View Profile</a>
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.addEventListener('click', () => window.location.href = `/teacher/teacher.html?id=${teacher.id}`);
                 teacherGrid.appendChild(card);
             });
-            console.log('Client - Loaded teachers:', teachers.length, 'Sort/Search/Tags:', { sort, direction, search, tags });
+            console.log('Client - Loaded teachers:', teachers.length, 'Sort/Search:', { sort, direction, search });
         } catch (error) {
             console.error('Client - Error loading teachers:', error.message);
             teacherGrid.innerHTML = '<p class="error-message">Error loading teachers. Please try again later.</p>';
@@ -33,17 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sortSelect.addEventListener('change', (e) => {
         const [sort, direction] = e.target.value.split('-');
-        loadTeachers(sort, direction, searchBar.value, tagSearch.value);
+        loadTeachers(sort, direction, searchBar.value);
     });
 
     searchBar.addEventListener('input', () => {
         const [sort, direction] = sortSelect.value.split('-');
-        loadTeachers(sort, direction, searchBar.value, tagSearch.value);
-    });
-
-    tagSearch.addEventListener('input', () => {
-        const [sort, direction] = sortSelect.value.split('-');
-        loadTeachers(sort, direction, searchBar.value, tagSearch.value);
+        loadTeachers(sort, direction, searchBar.value);
     });
 
     // Initial load with default sorting (alphabetical ascending)

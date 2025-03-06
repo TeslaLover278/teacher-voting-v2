@@ -31,12 +31,13 @@ function loadTeachersFromFile() {
                 .pipe(parse({ columns: true, trim: true, skip_empty_lines: true }))
                 .on('data', (row) => {
                     // Ensure all required fields exist and parse them
-                    if (row.name && row.description && row.bio && row.classes && row.id && row.tags) {
+                    if (row.name && row.description && row.bio && row.classes && row.id && row.tags && row.room_number) {
                         const classes = row.classes.split(',').map(c => c.trim()).filter(c => c); // Split and clean classes
                         const tags = row.tags.split(',').map(t => t.trim()).filter(t => t); // Split and clean tags
                         const id = parseInt(row.id, 10); // Parse ID as integer
+                        const roomNumber = row.room_number.trim(); // Parse room number
                         if (!isNaN(id)) {
-                            records.push({ id, name: row.name, description: row.description, bio: row.bio, classes, tags });
+                            records.push({ id, name: row.name, description: row.description, bio: row.bio, classes, tags, room_number: roomNumber });
                         } else {
                             console.warn('Server - Invalid ID for teacher:', row.name, 'Skipping...');
                         }
@@ -46,7 +47,7 @@ function loadTeachersFromFile() {
                 })
                 .on('end', () => {
                     teachers = records.sort((a, b) => a.id - b.id); // Sort by ID for consistency
-                    console.log('Server - Loaded teachers from CSV with tags:', teachers.length);
+                    console.log('Server - Loaded teachers from CSV with tags and room numbers:', teachers.length);
                 })
                 .on('error', (error) => {
                     throw new Error(`Error parsing CSV: ${error.message}`);
@@ -66,10 +67,10 @@ loadTeachersFromFile(); // Load teachers on startup
 // Save teachers back to CSV file after modifications (for admin actions)
 function saveTeachersToFile() {
     try {
-        const headers = ['id', 'name', 'description', 'bio', 'classes', 'tags'];
+        const headers = ['id', 'name', 'description', 'bio', 'classes', 'tags', 'room_number'];
         const csvContent = [
             headers.join(','),
-            ...teachers.map(t => `${t.id},${t.name},${t.description.replace(/,/g, ';')},${t.bio.replace(/,/g, ';')},${t.classes.join(',')},${t.tags.join(',')}`)
+            ...teachers.map(t => `${t.id},${t.name},${t.description.replace(/,/g, ';')},${t.bio.replace(/,/g, ';')},${t.classes.join(',')},${t.tags.join(',')},${t.room_number}`)
         ].join('\n');
         fs.writeFileSync(teachersFilePath, csvContent, 'utf8');
         console.log('Server - Saved teachers to CSV');
@@ -157,6 +158,7 @@ app.get('/api/teachers', (req, res) => {
             description: teacher.description, // Include description, exclude bio
             classes: teacher.classes, 
             tags: teacher.tags, // Include tags
+            room_number: teacher.room_number, // Include room number
             avg_rating: avgRating, 
             rating_count: teacherRatings.length 
         };
@@ -218,6 +220,7 @@ app.get('/api/teachers/:id', (req, res) => {
         bio: teacher.bio, // Include bio here
         classes: teacher.classes, 
         tags: teacher.tags, // Include tags
+        room_number: teacher.room_number, // Include room number
         avg_rating: avgRating, 
         ratings: teacherRatings 
     });
@@ -252,14 +255,14 @@ app.post('/api/ratings', (req, res) => {
 
 // Add a new teacher (admin-only, now via CSV)
 app.post('/api/teachers', authenticateAdmin, (req, res) => {
-    const { name, bio, classes, description, id, tags } = req.body;
-    if (!name || !bio || !classes || !Array.isArray(classes) || !description || isNaN(id) || !tags || !Array.isArray(tags)) {
-        return res.status(400).json({ error: 'Name, bio, classes (as an array), description, ID (number), and tags (as an array) are required.' });
+    const { name, bio, classes, description, id, tags, room_number } = req.body;
+    if (!name || !bio || !classes || !Array.isArray(classes) || !description || isNaN(id) || !tags || !Array.isArray(tags) || !room_number) {
+        return res.status(400).json({ error: 'Name, bio, classes (as an array), description, ID (number), tags (as an array), and room number are required.' });
     }
-    const newTeacher = { id: parseInt(id), name, description, bio, classes, tags: tags.map(t => t.trim()).filter(t => t) };
+    const newTeacher = { id: parseInt(id), name, description, bio, classes, tags: tags.map(t => t.trim()).filter(t => t), room_number: room_number.trim() };
     teachers.push(newTeacher);
     saveTeachersToFile(); // Save to CSV after adding
-    console.log('Server - Added new teacher:', newTeacher.name, 'ID:', newTeacher.id, 'Tags:', newTeacher.tags);
+    console.log('Server - Added new teacher:', newTeacher.name, 'ID:', newTeacher.id, 'Tags:', newTeacher.tags, 'Room:', newTeacher.room_number);
     res.json(newTeacher);
 });
 

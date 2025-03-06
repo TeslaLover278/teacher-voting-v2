@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
 
             document.getElementById('teacher-title').textContent = teacher.name; // Set name as title
+            document.getElementById('teacher-room').textContent = `Room: ${teacher.room_number}`; // Show room number
             document.getElementById('teacher-bio').textContent = teacher.bio || 'No bio available.'; // Show bio
             // Only show summary if available, otherwise hide it
             const summaryElement = document.getElementById('teacher-summary');
@@ -69,20 +70,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             const table = document.getElementById('teacher-classes');
             table.innerHTML = ''; // Clear existing table
             
-            // Top row: Blocks 1–4
-            const topRow = table.insertRow();
-            for (let i = 1; i <= 4; i++) {
-                const cell = topRow.insertCell();
-                cell.textContent = `Block ${i}`;
-                cell.className = 'schedule-header';
-            }
+            // Create 3 rows: Blocks, Classes, Grade Levels
+            const blockRow = table.insertRow();
+            const classRow = table.insertRow();
+            const gradeRow = table.insertRow();
 
-            // Bottom row: Teacher's schedule (classes)
-            const bottomRow = table.insertRow();
-            for (let i = 0; i < 4; i++) {
-                const cell = bottomRow.insertCell();
-                cell.textContent = teacher.classes[i] || 'N/A';
-                cell.className = 'schedule-cell';
+            for (let i = 1; i <= 4; i++) {
+                // Blocks row (Headers)
+                const blockCell = blockRow.insertCell();
+                blockCell.textContent = `Block ${i}`;
+                blockCell.className = 'schedule-header';
+
+                // Classes row
+                const classCell = classRow.insertCell();
+                classCell.textContent = teacher.classes[i - 1] || 'N/A';
+                classCell.className = 'schedule-cell';
+
+                // Grade Levels row (Infer based on class names)
+                const gradeCell = gradeRow.insertCell();
+                const grade = getGradeLevel(teacher.classes[i - 1] || 'N/A');
+                gradeCell.textContent = grade || 'N/A';
+                gradeCell.className = 'schedule-cell';
             }
 
             const reviewsDiv = document.getElementById('reviews');
@@ -135,11 +143,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 img.alt = `Default image for teacher ID ${teacherId}`;
             };
             document.getElementById('teacher-title').textContent = `Teacher ID ${teacherId}`;
+            document.getElementById('teacher-room').textContent = 'Room: N/A'; // Default room on error
             document.getElementById('teacher-bio').textContent = 'No bio available due to error.';
             document.getElementById('teacher-summary').style.display = 'none'; // Hide summary on error
             document.getElementById('avg-rating').innerHTML = '☆☆☆☆☆';
             document.getElementById('vote-count').textContent = '(0)';
         }
+    }
+
+    // Helper function to infer grade level from class name
+    function getGradeLevel(className) {
+        if (!className || className === 'N/A') return null;
+        const lowerCaseClass = className.toLowerCase();
+        if (lowerCaseClass.includes('9')) return '9th';
+        if (lowerCaseClass.includes('10')) return '10th';
+        if (lowerCaseClass.includes('11')) return '11th';
+        if (lowerCaseClass.includes('12')) return '12th';
+        return 'All'; // Default for non-grade-specific classes (e.g., Art, PE)
     }
 
     const starRating = document.getElementById('star-rating');
@@ -162,7 +182,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Ensure comments are sent correctly and cookie logic is correct
     document.getElementById('rating-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!selectedRating) {
