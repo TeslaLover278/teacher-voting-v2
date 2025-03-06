@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const div = document.createElement('div');
                 div.className = 'admin-item';
                 div.innerHTML = `
-                    <p>${teacher.name} - ${teacher.bio}</p>
+                    <p>${teacher.name} - ${teacher.description}</p>
                     <div class="admin-actions">
                         <button onclick="deleteTeacher(${teacher.id})">Delete</button>
                     </div>
@@ -45,11 +45,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const votes = await response.json();
             voteList.innerHTML = '';
             votes.forEach(vote => {
-                const teacher = teachers.find(t => t.id === vote.teacher_id);
+                const teacher = teachers.find(t => t.id === vote.teacher_id) || { name: 'Unknown Teacher' };
                 const div = document.createElement('div');
                 div.className = 'admin-item';
                 div.innerHTML = `
-                    <p>${teacher ? teacher.name : 'Unknown Teacher'} - ${'★'.repeat(vote.rating)}${'☆'.repeat(5 - vote.rating)} - ${vote.review || 'No review'}</p>
+                    <p>${teacher.name} - ${'★'.repeat(vote.rating)}${'☆'.repeat(5 - vote.rating)} - ${vote.comment || 'No comment'}</p>
                     <div class="admin-actions">
                         <button onclick="modifyVote(${vote.teacher_id})">Modify</button>
                         <button onclick="deleteVote(${vote.teacher_id})">Delete</button>
@@ -68,17 +68,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
         const name = document.getElementById('teacher-name').value;
         const bio = document.getElementById('teacher-bio').value;
+        const description = document.getElementById('teacher-description').value;
         const classes = document.getElementById('teacher-classes').value.split(',').map(c => c.trim());
+        const id = parseInt(document.getElementById('teacher-id').value) || (teachers.length ? Math.max(...teachers.map(t => t.id)) + 1 : 1);
 
         try {
-            console.log('Client - Adding new teacher:', { name, bio, classes });
+            console.log('Client - Adding new teacher:', { name, bio, description, classes, id });
             const response = await fetch('/api/teachers', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ name, bio, classes })
+                body: JSON.stringify({ name, bio, classes, description, id })
             });
             if (response.ok) {
                 const data = await response.json();
@@ -120,32 +122,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    window.modifyVote = (teacherId) => {
+    window.modifyVote = async (teacherId) => {
         const rating = prompt('Enter new rating (1-5):');
-        const review = prompt('Enter new review (optional):');
+        const comment = prompt('Enter new comment (optional):');
         if (rating && !isNaN(rating) && rating >= 1 && rating <= 5) {
-            fetch(`/api/admin/votes/${teacherId}`, {
-                method: 'PUT',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ rating: parseInt(rating), review })
-            }).then(response => {
+            try {
+                console.log('Client - Modifying vote for teacher:', teacherId, 'with rating:', rating, 'and comment:', comment);
+                const response = await fetch(`/api/admin/votes/${teacherId}`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ rating: parseInt(rating), comment })
+                });
                 if (response.ok) {
                     alert('Vote modified successfully!');
                     console.log('Client - Vote modified for teacher:', teacherId);
                     loadVotes();
                 } else {
-                    response.text().then(errorText => {
-                        console.error('Client - Error modifying vote:', errorText);
-                        alert('Error modifying vote. Please try again.');
-                    });
+                    const errorText = await response.text();
+                    throw new Error(errorText);
                 }
-            }).catch(error => {
+            } catch (error) {
                 console.error('Client - Error modifying vote:', error.message, error.stack);
                 alert('Error modifying vote. Please try again.');
-            });
+            }
         } else {
             alert('Please enter a valid rating (1-5).');
         }

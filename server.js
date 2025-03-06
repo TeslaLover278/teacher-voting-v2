@@ -1,4 +1,6 @@
 const express = require('express');
+const fs = require('fs'); // Add file system module for reading .txt
+const path = require('path'); // Add path module for file paths
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -16,65 +18,42 @@ app.use(express.json());
 
 console.log('Server - Middleware configured...');
 
-// In-memory database for teachers (expanded with description field)
-const teachers = [
-    { 
-        id: 1, 
-        name: "Mrs. Emerson", 
-        description: "A passionate literature lover who inspires students to explore the depths of classic and modern texts. Known for her engaging discussions.", 
-        bio: "Mrs. Emerson is a passionate literature enthusiast with over 15 years of teaching experience. She specializes in fostering a love for reading and writing among her students, guiding them through classic and contemporary works in English 9, English 10, Creative Writing, Poetry, Drama, and Literary Analysis.", 
-        classes: ["English 9", "English 10", "Creative Writing", "Poetry", "Drama", "Lit Analysis"] 
-    },
-    { 
-        id: 2, 
-        name: "Mrs. Hewitt", 
-        description: "A math wizard with a friendly demeanor, she makes algebra and calculus approachable for all. Her classes are a hit among students.", 
-        bio: "Mrs. Hewitt is a math expert with a warm smile and a knack for making complex concepts accessible. With a decade of experience, she teaches Algebra, Geometry, Calculus, Statistics, Trigonometry, and Pre-Calculus.", 
-        classes: ["Algebra", "Geometry", "Calculus", "Stats", "Trig", "Pre-Calc"] 
-    },
-    { 
-        id: 3, 
-        name: "Mrs. Neary", 
-        description: "A science enthusiast who brings experiments to life with her hands-on teaching style. Students enjoy her dynamic lessons.", 
-        bio: "Mrs. Neary brings science to life with her infectious enthusiasm and hands-on approach. With 12 years of teaching experience, she covers Biology, Chemistry, Physics, Earth Science, Botany, and Zoology.", 
-        classes: ["Biology", "Chemistry", "Physics", "Earth Science", "Botany", "Zoology"] 
-    },
-    { 
-        id: 4, 
-        name: "Mrs. Smith", 
-        description: "A history buff who captivates students with stories from the past. Her classes are both educational and entertaining.", 
-        bio: "Mrs. Smith is a dynamic history teacher who makes the past come alive for her students. With 18 years of experience, she teaches World History, U.S. History, Civics, Economics, Geography, and Anthropology.", 
-        classes: ["World History", "US History", "Civics", "Economics", "Geography", "Anthropology"] 
-    },
-    { 
-        id: 5, 
-        name: "Mr. Kalder", 
-        description: "An artistic soul who encourages creativity in every student. His art classes are a favorite for budding artists.", 
-        bio: "Mr. Kalder is an artistic visionary with a deep passion for creativity, boasting 10 years of teaching experience. He instructs Drawing, Painting, Sculpture, Art History, Design, and Photography.", 
-        classes: ["Drawing", "Painting", "Sculpture", "Art History", "Design", "Photography"] 
-    },
-    { 
-        id: 6, 
-        name: "Mr. V", 
-        description: "A music maestro who fills the classroom with harmony and enthusiasm. His lessons inspire a love for music.", 
-        bio: "Mr. V, a music maestro with 14 years of teaching experience, brings harmony and passion to his classroom. He teaches Band, Choir, Music Theory, Orchestra, Jazz, and Composition.", 
-        classes: ["Band", "Choir", "Music Theory", "Orchestra", "Jazz", "Composition"] 
-    },
-    { 
-        id: 7, 
-        name: "Mr. Gabel", 
-        description: "A fitness advocate who motivates students to stay active and healthy. His PE classes are energetic and fun.", 
-        bio: "Mr. Gabel is a PE enthusiast with 11 years of teaching experience, dedicated to promoting health and fitness. He teaches Gym, Health, Sports, Yoga, Nutrition, and Fitness.", 
-        classes: ["Gym", "Health", "Sports", "Yoga", "Nutrition", "Fitness"] 
-    },
-    { 
-        id: 8, 
-        name: "Mrs. Agustin", 
-        description: "A tech-savvy educator who brings innovation to the classroom. Students love her hands-on coding projects.", 
-        bio: "Mrs. Agustin is a tech innovator with a passion for cutting-edge technology, bringing 13 years of teaching experience to her classroom. She teaches Coding, Robotics, Web Design, AI Basics, Game Dev, and Cybersecurity.", 
-        classes: ["Coding", "Robotics", "Web Design", "AI Basics", "Game Dev", "Cybersecurity"] 
+// Load teachers from teachers.txt file
+let teachers = [];
+const teachersFilePath = path.join(__dirname, 'teachers.txt');
+
+function loadTeachersFromFile() {
+    try {
+        if (fs.existsSync(teachersFilePath)) {
+            const fileContent = fs.readFileSync(teachersFilePath, 'utf8');
+            teachers = fileContent.trim().split('\n').map(line => {
+                const [namePart, descriptionPart, bioPart, classesPart, idPart] = line.split('; ');
+                const name = namePart.replace('name: ', '');
+                const description = descriptionPart.replace('description: ', '');
+                const bio = bioPart.replace('bio: ', '');
+                const classes = classesPart.replace('classes: ', '').split(', ');
+                const id = parseInt(idPart.replace('id: ', ''));
+                return { id, name, description, bio, classes };
+            }).sort((a, b) => a.id - b.id); // Sort by ID for consistency
+            console.log('Server - Loaded teachers from file:', teachers.length);
+        } else {
+            console.log('Server - teachers.txt not found, starting with empty teachers array');
+            teachers = [];
+        }
+    } catch (error) {
+        console.error('Server - Error loading teachers from file:', error.message);
+        teachers = []; // Fallback to empty array if file fails
     }
-];
+}
+
+loadTeachersFromFile(); // Load teachers on startup
+
+// Save teachers back to file after modifications (for admin actions)
+function saveTeachersToFile() {
+    const content = teachers.map(t => `name: ${t.name}; description: ${t.description}; bio: ${t.bio}; classes: ${t.classes.join(', ')}; id: ${t.id}`).join('\n');
+    fs.writeFileSync(teachersFilePath, content, 'utf8');
+    console.log('Server - Saved teachers to file');
+}
 
 const ratings = []; // In-memory ratings persist during runtime
 
@@ -115,7 +94,7 @@ app.get('/api/admin/votes', authenticateAdmin, (req, res) => {
 // Modify a vote (admin only)
 app.put('/api/admin/votes/:teacherId', authenticateAdmin, (req, res) => {
     const teacherId = parseInt(req.params.teacherId);
-    const { rating, comment } = req.body; // Changed review to comment
+    const { rating, comment } = req.body;
     if (!rating || isNaN(rating) || rating < 1 || rating > 5) {
         return res.status(400).json({ error: 'Rating must be a number between 1 and 5.' });
     }
@@ -218,7 +197,7 @@ app.get('/api/teachers/:id', (req, res) => {
 
 // Submit a rating (with comment support)
 app.post('/api/ratings', (req, res) => {
-    const { teacher_id, rating, comment } = req.body; // Changed review to comment
+    const { teacher_id, rating, comment } = req.body;
     if (!teacher_id || isNaN(teacher_id) || !rating || isNaN(rating) || rating < 1 || rating > 5) {
         return res.status(400).json({ error: 'Invalid teacher ID or rating. Rating must be a number between 1 and 5.' });
     }
@@ -232,7 +211,7 @@ app.post('/api/ratings', (req, res) => {
         return;
     }
 
-    ratings.push({ teacher_id: teacherId, rating: parseInt(rating), comment: comment || '' }); // Store comment
+    ratings.push({ teacher_id: teacherId, rating: parseInt(rating), comment: comment || '' });
     votedArray.push(teacherId);
     setCookie(res, 'votedTeachers', votedArray.join(','), 365);
     console.log('Server - Added rating for teacher:', teacherId, 'Rating:', { rating, comment });
@@ -241,20 +220,15 @@ app.post('/api/ratings', (req, res) => {
     res.json({ message: 'Rating submitted!' });
 });
 
-// Add a new teacher (admin-only)
+// Add a new teacher (admin-only, now via file)
 app.post('/api/teachers', authenticateAdmin, (req, res) => {
-    const { name, bio, classes, description } = req.body; // Added description
-    if (!name || !bio || !classes || !Array.isArray(classes) || !description) {
-        return res.status(400).json({ error: 'Name, bio, classes (as an array), and description are required.' });
+    const { name, bio, classes, description, id } = req.body;
+    if (!name || !bio || !classes || !Array.isArray(classes) || !description || isNaN(id)) {
+        return res.status(400).json({ error: 'Name, bio, classes (as an array), description, and ID (number) are required.' });
     }
-    const newTeacher = {
-        id: teachers.length ? Math.max(...teachers.map(t => t.id)) + 1 : 1,
-        name,
-        bio,
-        classes,
-        description
-    };
+    const newTeacher = { id: parseInt(id), name, description, bio, classes };
     teachers.push(newTeacher);
+    saveTeachersToFile(); // Save to file after adding
     console.log('Server - Added new teacher:', newTeacher.name, 'ID:', newTeacher.id);
     res.json(newTeacher);
 });
@@ -271,6 +245,7 @@ app.delete('/api/admin/teachers/:id', authenticateAdmin, (req, res) => {
         const newRatings = ratings.filter(r => r.teacher_id !== id); // Remove all votes for this teacher
         ratings.length = 0;
         ratings.push(...newRatings);
+        saveTeachersToFile(); // Save to file after deletion
         console.log('Server - Deleted teacher ID:', id, 'Teachers remaining:', teachers.length);
         res.json({ message: 'Teacher and their votes deleted successfully!' });
     } else {

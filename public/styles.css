@@ -44,7 +44,7 @@ body {
     flex-grow: 0; /* Prevent title from growing too much */
     text-align: center; /* Center the title */
 }
-.admin-btn {
+.admin-btn, .logout-btn {
     padding: 10px 15px; /* Increased padding for visibility */
     background-color: #00B7D1; /* Teal for admin button */
     color: #FFFFFF; /* White text */
@@ -54,7 +54,7 @@ body {
     margin-left: 10px; /* Reduced margin to move left more */
     margin-right: 10px; /* Space from edge */
 }
-.admin-btn:hover {
+.admin-btn:hover, .logout-btn:hover {
     background-color: #0078D4; /* Blue for hover state */
 }
 .teacher-profile-container {
@@ -281,6 +281,10 @@ body {
     font-size: 14px;
     color: #000000; /* Black text for bio */
 }
+.stars {
+    margin: 5px 0;
+    font-size: 16px; /* Ensure stars are readable */
+}
 .view-profile {
     display: block;
     margin-top: 10px;
@@ -289,6 +293,60 @@ body {
 }
 .view-profile:hover {
     color: #0078D4; /* Blue for hover state */
+}
+
+/* Responsive design for different screen sizes */
+@media (max-width: 1024px) {
+    .teacher-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 columns on tablets */
+    }
+    .teacher-content {
+        flex-direction: column; /* Stack on tablets */
+        align-items: center;
+    }
+    .teacher-left, .teacher-right {
+        max-width: 100%; /* Full width on tablets */
+    }
+}
+
+@media (max-width: 768px) {
+    .teacher-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns on smaller tablets */
+    }
+    .site-header {
+        padding: 5px 10px; /* Reduce padding on smaller screens */
+    }
+    .header-title {
+        font-size: 1.2em; /* Smaller title on mobile */
+    }
+    .admin-btn, .logout-btn {
+        padding: 8px 12px; /* Smaller buttons on mobile */
+        margin-left: 5px; /* Adjust button spacing */
+        margin-right: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .teacher-grid {
+        grid-template-columns: 1fr; /* 1 column on mobile */
+    }
+    .controls {
+        flex-direction: column; /* Stack controls on mobile */
+        gap: 10px;
+        padding: 10px;
+        margin-top: 80px; /* Adjust for smaller header */
+    }
+    #search-bar, #sort-select {
+        width: 100%; /* Full width on mobile */
+    }
+    .teacher-card img {
+        width: 100px;
+        height: 100px; /* Smaller images on mobile */
+    }
+    .teacher-image {
+        width: 200px;
+        height: 200px; /* Smaller teacher photo on mobile */
+    }
 }
 
 /* Modal styles */
@@ -347,4 +405,55 @@ body {
 .error-message {
     color: #DC3545; /* Red for error messages */
     text-align: center;
+}
+
+/* Admin-specific styles */
+.admin-container {
+    margin-top: 100px; /* Adjust for fixed header */
+    padding: 20px;
+}
+.admin-section {
+    margin-bottom: 30px;
+}
+.admin-list {
+    margin-top: 15px;
+}
+.admin-item {
+    background-color: #FFFFFF;
+    border: 1px solid #00B7D1;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.admin-actions button {
+    margin-right: 10px;
+    padding: 5px 10px;
+    background-color: #00B7D1;
+    color: #FFFFFF;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.admin-actions button:hover {
+    background-color: #0078D4;
+}
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 500px;
+}
+.admin-form input, .admin-form button {
+    padding: 8px;
+    border: 1px solid #00B7D1;
+    border-radius: 4px;
+}
+.admin-form button {
+    background-color: #00B7D1;
+    color: #FFFFFF;
+    cursor: pointer;
+}
+.admin-form button:hover {
+    background-color: #0078D4;
 }

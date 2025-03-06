@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 : '☆☆☆☆☆';
             const voteCount = teacher.rating_count || 0;
             document.getElementById('avg-rating').innerHTML = stars;
-            document.getElementById('vote-count').textContent = voteCount;
+            document.getElementById('vote-count').textContent = `(${voteCount})`; // Changed to (x)
             console.log('Client - Displayed rating:', stars, 'Votes:', voteCount);
 
             const table = document.getElementById('teacher-classes');
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('teacher-bio').textContent = 'No bio available due to error.';
             document.getElementById('teacher-summary').style.display = 'none'; // Hide summary on error
             document.getElementById('avg-rating').innerHTML = '☆☆☆☆☆';
-            document.getElementById('vote-count').textContent = '0';
+            document.getElementById('vote-count').textContent = '(0)';
         }
     }
 
@@ -162,6 +162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // Ensure comments are sent correctly
     document.getElementById('rating-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!selectedRating) {
@@ -171,11 +172,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const comment = document.getElementById('rating-comment').value.trim();
         try {
-            console.log('Client - Submitting vote for teacher', teacherId);
+            console.log('Client - Submitting vote for teacher', teacherId, 'with comment:', comment);
             const response = await fetch('/api/ratings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ teacher_id: teacherId, rating: selectedRating, comment }) // Send comment
+                body: JSON.stringify({ teacher_id: teacherId, rating: selectedRating, comment })
             });
             if (!response.ok) {
                 const errorText = await response.text();
