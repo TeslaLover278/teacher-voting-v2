@@ -51,8 +51,8 @@ body {
     border: none;
     cursor: pointer;
     border-radius: 4px;
-    margin-left: 10px; /* Reduced margin to move left more */
-    margin-right: 10px; /* Space from edge */
+    margin-left: 30px; /* Reduced margin to move left more */
+    margin-right: 50px; /* Space from edge */
 }
 .admin-btn:hover, .logout-btn:hover {
     background-color: #0078D4; /* Blue for hover state */
