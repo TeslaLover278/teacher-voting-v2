@@ -142,7 +142,7 @@ app.delete('/api/admin/votes/:teacherId', authenticateAdmin, (req, res) => {
     }
 });
 
-// Get all teachers with average ratings and sorting options
+// Get all teachers with average ratings and sorting options (ascending/descending)
 app.get('/api/teachers', (req, res) => {
     let teachersWithRatings = teachers.map(teacher => {
         const teacherRatings = ratings.filter(r => r.teacher_id === teacher.id);
@@ -161,12 +161,21 @@ app.get('/api/teachers', (req, res) => {
 
     // Apply sorting based on query parameter
     const sortBy = req.query.sort || 'default';
+    const sortDirection = req.query.direction || 'asc'; // Default to ascending
     switch (sortBy) {
         case 'alphabetical':
-            teachersWithRatings.sort((a, b) => a.name.localeCompare(b.name));
+            teachersWithRatings.sort((a, b) => 
+                sortDirection === 'asc' 
+                    ? a.name.localeCompare(b.name) 
+                    : b.name.localeCompare(a.name)
+            );
             break;
         case 'ratings':
-            teachersWithRatings.sort((a, b) => (b.avg_rating || 0) - (a.avg_rating || 0));
+            teachersWithRatings.sort((a, b) => 
+                sortDirection === 'asc' 
+                    ? (a.avg_rating || 0) - (b.avg_rating || 0) 
+                    : (b.avg_rating || 0) - (a.avg_rating || 0)
+            );
             break;
         case 'default':
         default:
@@ -182,7 +191,7 @@ app.get('/api/teachers', (req, res) => {
         );
     }
 
-    console.log('Server - Fetched teachers:', teachersWithRatings.length, 'Sort/Search:', { sortBy, searchQuery });
+    console.log('Server - Fetched teachers:', teachersWithRatings.length, 'Sort/Search:', { sortBy, sortDirection, searchQuery });
     res.json(teachersWithRatings);
 });
 

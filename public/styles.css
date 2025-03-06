@@ -25,6 +25,8 @@ body {
     display: flex;
     align-items: center;
     gap: 20px;
+    flex-grow: 1; /* Allow header-content to take up remaining space */
+    justify-content: center; /* Center the logo and title */
 }
 .logo {
     width: 50px; /* Fixed width for logo */
@@ -39,7 +41,7 @@ body {
     margin: 0; /* Remove default margins */
     font-size: 1.5em; /* Smaller title size for header */
     color: #000000; /* Black text */
-    flex-grow: 1; /* Allow title to grow and center */
+    flex-grow: 0; /* Prevent title from growing too much */
     text-align: center; /* Center the title */
 }
 .admin-btn {
@@ -49,8 +51,8 @@ body {
     border: none;
     cursor: pointer;
     border-radius: 4px;
-    margin-left: 30px; /* Increased margin to stick out more from the side */
-    margin-right: 20px; /* Space from edge */
+    margin-left: 10px; /* Reduced margin to move left more */
+    margin-right: 10px; /* Space from edge */
 }
 .admin-btn:hover {
     background-color: #0078D4; /* Blue for hover state */
@@ -193,6 +195,15 @@ body {
     margin-bottom: 10px;
     background-color: #FFFFFF; /* White background for reviews */
     border-radius: 4px;
+    display: flex; /* Added to align stars and comment side by side */
+    align-items: center; /* Center vertically */
+    gap: 10px; /* Space between stars and comment */
+}
+.review-item strong {
+    flex-shrink: 0; /* Prevent stars from shrinking */
+}
+.review-item span {
+    flex-grow: 1; /* Allow comment to grow and wrap */
 }
 .reviews-link, .back-link {
     margin-right: 10px;

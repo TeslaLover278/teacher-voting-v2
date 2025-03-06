@@ -3,9 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchBar = document.getElementById('search-bar');
     const sortSelect = document.getElementById('sort-select');
 
-    async function loadTeachers(sort = 'default', search = '') {
+    async function loadTeachers(sort = 'default', direction = 'asc', search = '') {
         try {
-            const response = await fetch(`/api/teachers?sort=${sort}&search=${encodeURIComponent(search)}`);
+            const response = await fetch(`/api/teachers?sort=${sort}&direction=${direction}&search=${encodeURIComponent(search)}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
             const teachers = await response.json();
 
@@ -23,20 +23,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.addEventListener('click', () => window.location.href = `/teacher/teacher.html?id=${teacher.id}`);
                 teacherGrid.appendChild(card);
             });
-            console.log('Client - Loaded teachers:', teachers.length, 'Sort/Search:', { sort, search });
+            console.log('Client - Loaded teachers:', teachers.length, 'Sort/Search:', { sort, direction, search });
         } catch (error) {
             console.error('Client - Error loading teachers:', error.message);
             teacherGrid.innerHTML = '<p class="error-message">Error loading teachers. Please try again later.</p>';
         }
     }
 
+    sortSelect.addEventListener('change', (e) => {
+        const [sort, direction] = e.target.value.split('-');
+        loadTeachers(sort, direction, searchBar.value);
+    });
+
     searchBar.addEventListener('input', () => {
-        loadTeachers(sortSelect.value, searchBar.value);
+        const [sort, direction] = sortSelect.value.split('-');
+        loadTeachers(sort, direction, searchBar.value);
     });
 
-    sortSelect.addEventListener('change', () => {
-        loadTeachers(sortSelect.value, searchBar.value);
-    });
-
-    loadTeachers().catch(error => console.error('Client - Initial load error:', error.message));
+    // Initial load with default sorting (alphabetical ascending)
+    loadTeachers('alphabetical', 'asc').catch(error => console.error('Client - Initial load error:', error.message));
 });

@@ -49,9 +49,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             document.getElementById('teacher-title').textContent = teacher.name; // Set name as title
             document.getElementById('teacher-bio').textContent = teacher.bio || 'No bio available.'; // Show bio
-            document.getElementById('teacher-summary').textContent = teacher.summary || 'No summary available.';
+            // Only show summary if available, otherwise hide it
+            const summaryElement = document.getElementById('teacher-summary');
+            if (teacher.summary) {
+                summaryElement.textContent = teacher.summary;
+            } else {
+                summaryElement.style.display = 'none';
+            }
 
-            // Show 0 stars with (0) if no votes, otherwise show stars with vote count
+            // Show stars based on avg_rating, default to no stars if no ratings
             const stars = teacher.avg_rating !== null && teacher.rating_count > 0 
                 ? `${'★'.repeat(Math.round(teacher.avg_rating))}${'☆'.repeat(5 - Math.round(teacher.avg_rating))}`
                 : '☆☆☆☆☆';
@@ -84,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             teacher.ratings.forEach(r => {
                 const div = document.createElement('div');
                 div.className = 'review-item';
-                div.innerHTML = `<strong>${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</strong><br>${r.comment || 'No comment provided.'}`; // Changed review to comment
+                div.innerHTML = `<strong>${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</strong><span>${r.comment || 'No comment provided.'}</span>`; // Show comment next to stars
                 reviewsDiv.appendChild(div);
             });
 
@@ -130,7 +136,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
             document.getElementById('teacher-title').textContent = `Teacher ID ${teacherId}`;
             document.getElementById('teacher-bio').textContent = 'No bio available due to error.';
-            document.getElementById('teacher-summary').textContent = 'No summary available due to error.';
+            document.getElementById('teacher-summary').style.display = 'none'; // Hide summary on error
             document.getElementById('avg-rating').innerHTML = '☆☆☆☆☆';
             document.getElementById('vote-count').textContent = '0';
         }
