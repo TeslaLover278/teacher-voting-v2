@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const div = document.createElement('div');
                 div.className = 'admin-item';
                 div.innerHTML = `
-                    <p>${teacher.name} - ${teacher.description}</p>
+                    <p>${teacher.name} - ${teacher.description} (Tags: ${teacher.tags.join(', ')})</p>
                     <div class="admin-actions">
                         <button onclick="deleteTeacher(${teacher.id})">Delete</button>
                     </div>
@@ -71,16 +71,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         const description = document.getElementById('teacher-description').value;
         const classes = document.getElementById('teacher-classes').value.split(',').map(c => c.trim());
         const id = parseInt(document.getElementById('teacher-id').value) || (teachers.length ? Math.max(...teachers.map(t => t.id)) + 1 : 1);
+        const tags = document.getElementById('teacher-tags').value.split(',').map(t => t.trim()).filter(t => t);
 
         try {
-            console.log('Client - Adding new teacher:', { name, bio, description, classes, id });
+            console.log('Client - Adding new teacher:', { name, bio, description, classes, id, tags });
             const response = await fetch('/api/teachers', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ name, bio, classes, description, id })
+                body: JSON.stringify({ name, bio, classes, description, id, tags })
             });
             if (response.ok) {
                 const data = await response.json();

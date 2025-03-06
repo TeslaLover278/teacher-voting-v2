@@ -31,11 +31,12 @@ function loadTeachersFromFile() {
                 .pipe(parse({ columns: true, trim: true, skip_empty_lines: true }))
                 .on('data', (row) => {
                     // Ensure all required fields exist and parse them
-                    if (row.name && row.description && row.bio && row.classes && row.id) {
+                    if (row.name && row.description && row.bio && row.classes && row.id && row.tags) {
                         const classes = row.classes.split(',').map(c => c.trim()).filter(c => c); // Split and clean classes
+                        const tags = row.tags.split(',').map(t => t.trim()).filter(t => t); // Split and clean tags
                         const id = parseInt(row.id, 10); // Parse ID as integer
                         if (!isNaN(id)) {
-                            records.push({ id, name: row.name, description: row.description, bio: row.bio, classes });
+                            records.push({ id, name: row.name, description: row.description, bio: row.bio, classes, tags });
                         } else {
                             console.warn('Server - Invalid ID for teacher:', row.name, 'Skipping...');
                         }
@@ -45,7 +46,7 @@ function loadTeachersFromFile() {
                 })
                 .on('end', () => {
                     teachers = records.sort((a, b) => a.id - b.id); // Sort by ID for consistency
-                    console.log('Server - Loaded teachers from CSV:', teachers.length);
+                    console.log('Server - Loaded teachers from CSV with tags:', teachers.length);
                 })
                 .on('error', (error) => {
                     throw new Error(`Error parsing CSV: ${error.message}`);
@@ -65,10 +66,10 @@ loadTeachersFromFile(); // Load teachers on startup
 // Save teachers back to CSV file after modifications (for admin actions)
 function saveTeachersToFile() {
     try {
-        const headers = ['id', 'name', 'description', 'bio', 'classes'];
+        const headers = ['id', 'name', 'description', 'bio', 'classes', 'tags'];
         const csvContent = [
             headers.join(','),
-            ...teachers.map(t => `${t.id},${t.name},${t.description.replace(/,/g, ';')},${t.bio.replace(/,/g, ';')},${t.classes.join(',')}`)
+            ...teachers.map(t => `${t.id},${t.name},${t.description.replace(/,/g, ';')},${t.bio.replace(/,/g, ';')},${t.classes.join(',')},${t.tags.join(',')}`)
         ].join('\n');
         fs.writeFileSync(teachersFilePath, csvContent, 'utf8');
         console.log('Server - Saved teachers to CSV');
@@ -155,6 +156,7 @@ app.get('/api/teachers', (req, res) => {
             name: teacher.name, 
             description: teacher.description, // Include description, exclude bio
             classes: teacher.classes, 
+            tags: teacher.tags, // Include tags
             avg_rating: avgRating, 
             rating_count: teacherRatings.length 
         };
@@ -184,15 +186,18 @@ app.get('/api/teachers', (req, res) => {
             break;
     }
 
-    // Apply search filter based on query parameter
+    // Apply search and tag filters based on query parameters
     const searchQuery = req.query.search || '';
-    if (searchQuery) {
-        teachersWithRatings = teachersWithRatings.filter(t => 
-            t.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+    const tagQuery = req.query.tags || '';
+    if (searchQuery || tagQuery) {
+        teachersWithRatings = teachersWithRatings.filter(t => {
+            const nameMatch = t.name.toLowerCase().includes(searchQuery.toLowerCase());
+            const tagMatch = !tagQuery || t.tags.some(tag => tag.toLowerCase().includes(tagQuery.toLowerCase()));
+            return nameMatch && tagMatch;
+        });
     }
 
-    console.log('Server - Fetched teachers:', teachersWithRatings.length, 'Sort/Search:', { sortBy, sortDirection, searchQuery });
+    console.log('Server - Fetched teachers:', teachersWithRatings.length, 'Sort/Search/Tags:', { sortBy, sortDirection, searchQuery, tagQuery });
     res.json(teachersWithRatings);
 });
 
@@ -212,6 +217,7 @@ app.get('/api/teachers/:id', (req, res) => {
         name: teacher.name, 
         bio: teacher.bio, // Include bio here
         classes: teacher.classes, 
+        tags: teacher.tags, // Include tags
         avg_rating: avgRating, 
         ratings: teacherRatings 
     });
@@ -244,14 +250,14 @@ app.post('/api/ratings', (req, res) => {
 
 // Add a new teacher (admin-only, now via CSV)
 app.post('/api/teachers', authenticateAdmin, (req, res) => {
-    const { name, bio, classes, description, id } = req.body;
-    if (!name || !bio || !classes || !Array.isArray(classes) || !description || isNaN(id)) {
-        return res.status(400).json({ error: 'Name, bio, classes (as an array), description, and ID (number) are required.' });
+    const { name, bio, classes, description, id, tags } = req.body;
+    if (!name || !bio || !classes || !Array.isArray(classes) || !description || isNaN(id) || !tags || !Array.isArray(tags)) {
+        return res.status(400).json({ error: 'Name, bio, classes (as an array), description, ID (number), and tags (as an array) are required.' });
     }
-    const newTeacher = { id: parseInt(id), name, description, bio, classes };
+    const newTeacher = { id: parseInt(id), name, description, bio, classes, tags: tags.map(t => t.trim()).filter(t => t) };
     teachers.push(newTeacher);
     saveTeachersToFile(); // Save to CSV after adding
-    console.log('Server - Added new teacher:', newTeacher.name, 'ID:', newTeacher.id);
+    console.log('Server - Added new teacher:', newTeacher.name, 'ID:', newTeacher.id, 'Tags:', newTeacher.tags);
     res.json(newTeacher);
 });
 
