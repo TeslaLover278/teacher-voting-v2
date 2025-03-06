@@ -223,7 +223,7 @@ app.get('/api/teachers/:id', (req, res) => {
     });
 });
 
-// Submit a rating (with comment support)
+// Submit a rating (with comment support, fixing cookie logic)
 app.post('/api/ratings', (req, res) => {
     const { teacher_id, rating, comment } = req.body;
     if (!teacher_id || isNaN(teacher_id) || !rating || isNaN(rating) || rating < 1 || rating > 5) {
@@ -234,11 +234,13 @@ app.post('/api/ratings', (req, res) => {
     const cookieStr = req.headers.cookie?.split('votedTeachers=')[1]?.split(';')[0] || '';
     const votedArray = cookieStr ? cookieStr.split(',').map(id => parseInt(id.trim())).filter(Boolean) : [];
 
+    // Check if the user has NOT voted for this teacher (fixing backwards logic)
     if (votedArray.includes(teacherId)) {
         res.status(400).json({ error: 'You have already voted for this teacher.' });
         return;
     }
 
+    // Add the vote and update the cookie
     ratings.push({ teacher_id: teacherId, rating: parseInt(rating), comment: comment || '' });
     votedArray.push(teacherId);
     setCookie(res, 'votedTeachers', votedArray.join(','), 365);

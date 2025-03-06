@@ -100,7 +100,7 @@ body {
 .teacher-bio, .teacher-summary {
     margin: 20px 0;
     color: #000000; /* Black text for bio/summary */
-    text-align: justify; /* Justify text for paragraph-like appearance */
+    text-align: left; /* Justify text for paragraph-like appearance */
 }
 .teacher-summary {
     font-style: italic; /* Italicize summary for distinction */

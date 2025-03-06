@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const cookieStr = getCookie('votedTeachers') || '';
             const votedArray = cookieStr ? cookieStr.split(',').map(id => parseInt(id.trim())).filter(Boolean) : [];
-            const hasVoted = votedArray.includes(parseInt(teacherId));
+            const hasVoted = votedArray.includes(parseInt(teacherId)); // Check if user has voted
 
             const ratingForm = document.getElementById('rating-form');
             const ratingHeading = document.getElementById('rating-heading');
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Ensure comments are sent correctly
+    // Ensure comments are sent correctly and cookie logic is correct
     document.getElementById('rating-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!selectedRating) {
@@ -192,6 +192,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             ratingHeading.style.display = 'none';
             voteMessage.style.display = 'block';
             showNotification('Your response has been recorded.');
+
+            // Update cookie to reflect the vote
+            const cookieStr = getCookie('votedTeachers') || '';
+            let votedArray = cookieStr ? cookieStr.split(',').map(id => parseInt(id.trim())).filter(Boolean) : [];
+            if (!votedArray.includes(parseInt(teacherId))) {
+                votedArray.push(parseInt(teacherId));
+                setCookie('votedTeachers', votedArray.join(','), 365);
+                console.log('Client - Updated votedTeachers cookie:', votedArray);
+            }
 
             await loadTeacher();
         } catch (error) {
