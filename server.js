@@ -1,25 +1,33 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const { parse } = require('csv-parse'); // Import csv-parse
+const { parse } = require('csv-parse');
+require('dotenv').config();
+const cookieParser = require('cookie-parser');
 const app = express();
 const port = process.env.PORT || 3000;
 
 console.log('Server - Starting initialization...');
 
-// Serve static files asynchronously
-app.use(express.static('public', { maxAge: '1d' }), (req, res, next) => {
-    console.log('Server - Serving static file for:', req.path);
+app.use('/public', express.static(path.join(__dirname, 'public'), { maxAge: '1d' }), (req, res, next) => {
+    console.log('Server - Serving static file from public for:', req.path);
     next();
 });
-app.use('/home', express.static('pages/home', { maxAge: '1d' }));
-app.use('/teacher', express.static('pages/teacher', { maxAge: '1d' }));
-app.use('/admin', express.static('pages/admin', { maxAge: '1d' }));
+app.use('/pages', express.static(path.join(__dirname, 'pages'), { maxAge: '1d' }));
 app.use(express.json());
+app.use(cookieParser());
 
 console.log('Server - Middleware configured...');
 
-// Load teachers from teachers.csv file
+app.get('/favicon.ico', (req, res) => {
+    const faviconPath = path.join(__dirname, 'public', 'favicon.ico');
+    if (fs.existsSync(faviconPath)) {
+        res.sendFile(faviconPath);
+    } else {
+        res.status(204).end();
+    }
+});
+
 let teachers = [];
 const teachersFilePath = path.join(__dirname, 'teachers.csv');
 
@@ -28,26 +36,35 @@ function loadTeachersFromFile() {
         if (fs.existsSync(teachersFilePath)) {
             const records = [];
             fs.createReadStream(teachersFilePath)
-                .pipe(parse({ columns: true, trim: true, skip_empty_lines: true }))
+                .pipe(parse({
+                    columns: true,
+                    trim: true,
+                    skip_empty_lines: true,
+                    quote: '"',
+                    escape: '\\',
+                    relax_column_count: true
+                }))
                 .on('data', (row) => {
-                    // Ensure all required fields exist and parse them
-                    if (row.name && row.description && row.bio && row.classes && row.id && row.tags && row.room_number) {
-                        const classes = row.classes.split(',').map(c => c.trim()).filter(c => c); // Split and clean classes
-                        const tags = row.tags.split(',').map(t => t.trim()).filter(t => t); // Split and clean tags
-                        const id = parseInt(row.id, 10); // Parse ID as integer
-                        const roomNumber = row.room_number.trim(); // Parse room number
-                        if (!isNaN(id)) {
-                            records.push({ id, name: row.name, description: row.description, bio: row.bio, classes, tags, room_number: roomNumber });
-                        } else {
-                            console.warn('Server - Invalid ID for teacher:', row.name, 'Skipping...');
+                    if (row.id && row.name && row.description && row.bio && row.classes && row.tags && row.room_number) {
+                        const classes = row.classes.split(',').map(c => c.trim()).filter(c => c);
+                        const tags = row.tags.split(',').map(t => t.trim()).filter(t => t);
+                        const id = row.id.trim();
+                        const roomNumber = row.room_number.trim();
+                        let schedule = [];
+                        try {
+                            schedule = row.schedule ? JSON.parse(row.schedule) : [];
+                        } catch (error) {
+                            console.warn(`Server - Invalid schedule JSON for teacher ${row.name}:`, error.message);
+                            schedule = [];
                         }
+                        records.push({ id, name: row.name, description: row.description, bio: row.bio, classes, tags, room_number: roomNumber, schedule });
                     } else {
                         console.warn('Server - Incomplete data for teacher, skipping:', row);
                     }
                 })
                 .on('end', () => {
-                    teachers = records.sort((a, b) => a.id - b.id); // Sort by ID for consistency
-                    console.log('Server - Loaded teachers from CSV with tags and room numbers:', teachers.length);
+                    teachers = records.sort((a, b) => a.id.localeCompare(b.id));
+                    console.log('Server - Loaded teachers from CSV with tags, room numbers, and schedules:', teachers.length);
                 })
                 .on('error', (error) => {
                     throw new Error(`Error parsing CSV: ${error.message}`);
@@ -58,19 +75,21 @@ function loadTeachersFromFile() {
         }
     } catch (error) {
         console.error('Server - Error loading teachers from CSV:', error.message);
-        teachers = []; // Fallback to empty array if file fails
+        teachers = [];
     }
 }
 
-loadTeachersFromFile(); // Load teachers on startup
+loadTeachersFromFile();
 
-// Save teachers back to CSV file after modifications (for admin actions)
 function saveTeachersToFile() {
     try {
-        const headers = ['id', 'name', 'description', 'bio', 'classes', 'tags', 'room_number'];
+        const headers = ['id', 'name', 'description', 'bio', 'classes', 'tags', 'room_number', 'schedule'];
         const csvContent = [
             headers.join(','),
-            ...teachers.map(t => `${t.id},${t.name},${t.description.replace(/,/g, ';')},${t.bio.replace(/,/g, ';')},${t.classes.join(',')},${t.tags.join(',')},${t.room_number}`)
+            ...teachers.map(t => {
+                const scheduleString = JSON.stringify(t.schedule).replace(/"/g, '\\"');
+                return `"${t.id}","${t.name}","${t.description.replace(/,/g, ';')}","${t.bio.replace(/,/g, ';')}","${t.classes.join(',')}","${t.tags.join(',')}","${t.room_number}","${scheduleString}"`;
+            })
         ].join('\n');
         fs.writeFileSync(teachersFilePath, csvContent, 'utf8');
         console.log('Server - Saved teachers to CSV');
@@ -79,45 +98,42 @@ function saveTeachersToFile() {
     }
 }
 
-const ratings = []; // In-memory ratings persist during runtime
+const ratings = [];
 
-// Admin credentials (hardcoded for simplicity; use a database in production)
-const ADMIN_CREDENTIALS = { username: 'admin', password: 'password123' };
+const ADMIN_CREDENTIALS = {
+    username: process.env.ADMIN_USERNAME || 'admin',
+    password: process.env.ADMIN_PASSWORD || 'password123'
+};
 
-// Middleware for admin authorization
 function authenticateAdmin(req, res, next) {
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = req.cookies.adminToken;
     if (!token || token !== 'admin-token') {
         return res.status(401).json({ error: 'Unauthorized access. Please log in as an admin.' });
     }
     next();
 }
 
-// Admin login
 app.post('/api/admin/login', (req, res) => {
     console.log('Server - Admin login attempt for:', req.body.username);
-    console.log('Server - Credentials match:', req.body.username === ADMIN_CREDENTIALS.username && req.body.password === ADMIN_CREDENTIALS.password);
     const { username, password } = req.body;
     if (!username || !password) {
         return res.status(400).json({ error: 'Username and password are required.' });
     }
     if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-        res.json({ token: 'admin-token' });
+        setCookie(res, 'adminToken', 'admin-token', 1);
+        res.json({ message: 'Logged in successfully' });
     } else {
         res.status(401).json({ error: 'Invalid credentials. Please try again.' });
     }
 });
 
-// Get all votes (admin only)
 app.get('/api/admin/votes', authenticateAdmin, (req, res) => {
     console.log('Server - Fetching all votes');
-    console.log('Server - Total votes:', ratings.length);
     res.json(ratings);
 });
 
-// Modify a vote (admin only)
 app.put('/api/admin/votes/:teacherId', authenticateAdmin, (req, res) => {
-    const teacherId = parseInt(req.params.teacherId);
+    const teacherId = req.params.teacherId;
     const { rating, comment } = req.body;
     if (!rating || isNaN(rating) || rating < 1 || rating > 5) {
         return res.status(400).json({ error: 'Rating must be a number between 1 and 5.' });
@@ -129,23 +145,20 @@ app.put('/api/admin/votes/:teacherId', authenticateAdmin, (req, res) => {
     res.json({ message: 'Vote modified successfully!' });
 });
 
-// Delete a vote (admin only)
 app.delete('/api/admin/votes/:teacherId', authenticateAdmin, (req, res) => {
-    const teacherId = parseInt(req.params.teacherId);
+    const teacherId = req.params.teacherId;
     const initialLength = ratings.length;
     const newRatings = ratings.filter(r => r.teacher_id !== teacherId);
     if (newRatings.length < initialLength) {
         ratings.length = 0;
         ratings.push(...newRatings);
         console.log('Server - Deleted vote for teacher:', teacherId);
-        console.log('Server - Votes remaining:', ratings.length);
         res.json({ message: 'Vote deleted successfully!' });
     } else {
         res.status(404).json({ error: 'No vote found for this teacher.' });
     }
 });
 
-// Get all teachers with average ratings and sorting options (ascending/descending)
 app.get('/api/teachers', (req, res) => {
     let teachersWithRatings = teachers.map(teacher => {
         const teacherRatings = ratings.filter(r => r.teacher_id === teacher.id);
@@ -155,18 +168,18 @@ app.get('/api/teachers', (req, res) => {
         return { 
             id: teacher.id, 
             name: teacher.name, 
-            description: teacher.description, // Include description, exclude bio
+            description: teacher.description, 
             classes: teacher.classes, 
-            tags: teacher.tags, // Include tags
-            room_number: teacher.room_number, // Include room number
+            tags: teacher.tags, 
+            room_number: teacher.room_number, 
             avg_rating: avgRating, 
-            rating_count: teacherRatings.length 
+            rating_count: teacherRatings.length,
+            schedule: teacher.schedule
         };
     });
 
-    // Apply sorting based on query parameter
     const sortBy = req.query.sort || 'default';
-    const sortDirection = req.query.direction || 'asc'; // Default to ascending
+    const sortDirection = req.query.direction || 'asc';
     switch (sortBy) {
         case 'alphabetical':
             teachersWithRatings.sort((a, b) => 
@@ -184,28 +197,31 @@ app.get('/api/teachers', (req, res) => {
             break;
         case 'default':
         default:
-            // No sorting (maintain original order)
             break;
     }
 
-    // Apply search and tag filters based on query parameters
     const searchQuery = req.query.search || '';
-    const tagQuery = req.query.tags || '';
-    if (searchQuery || tagQuery) {
+    if (searchQuery) {
         teachersWithRatings = teachersWithRatings.filter(t => {
             const nameMatch = t.name.toLowerCase().includes(searchQuery.toLowerCase());
-            const tagMatch = !tagQuery || t.tags.some(tag => tag.toLowerCase().includes(tagQuery.toLowerCase()));
-            return nameMatch && tagMatch;
+            const tagMatch = t.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+            return nameMatch || tagMatch;
         });
     }
 
-    console.log('Server - Fetched teachers:', teachersWithRatings.length, 'Sort/Search/Tags:', { sortBy, sortDirection, searchQuery, tagQuery });
-    res.json(teachersWithRatings);
+    const page = parseInt(req.query.page) || 1;
+    const perPage = parseInt(req.query.perPage) || 8;
+    const startIndex = (page - 1) * perPage;
+    const endIndex = startIndex + perPage;
+    const paginatedTeachers = teachersWithRatings.slice(startIndex, endIndex);
+    const totalTeachers = teachersWithRatings.length;
+
+    console.log('Server - Fetched teachers:', paginatedTeachers.length, 'Total:', totalTeachers, 'Sort/Search/Page/PerPage:', { sortBy, sortDirection, searchQuery, page, perPage });
+    res.json({ teachers: paginatedTeachers, total: totalTeachers });
 });
 
-// Get a single teacher by ID with ratings
 app.get('/api/teachers/:id', (req, res) => {
-    const id = parseInt(req.params.id);
+    const id = req.params.id;
     const teacher = teachers.find(t => t.id === id);
     if (!teacher) return res.status(404).json({ error: 'Teacher not found.' });
     
@@ -217,68 +233,71 @@ app.get('/api/teachers/:id', (req, res) => {
     res.json({ 
         id: teacher.id, 
         name: teacher.name, 
-        bio: teacher.bio, // Include bio here
+        bio: teacher.bio, 
         classes: teacher.classes, 
-        tags: teacher.tags, // Include tags
-        room_number: teacher.room_number, // Include room number
+        tags: teacher.tags, 
+        room_number: teacher.room_number, 
         avg_rating: avgRating, 
-        ratings: teacherRatings 
+        ratings: teacherRatings,
+        rating_count: teacherRatings.length,
+        schedule: teacher.schedule
     });
 });
 
-// Submit a rating (with comment support, fixing cookie logic)
 app.post('/api/ratings', (req, res) => {
     const { teacher_id, rating, comment } = req.body;
-    if (!teacher_id || isNaN(teacher_id) || !rating || isNaN(rating) || rating < 1 || rating > 5) {
+    if (!teacher_id || !rating || isNaN(rating) || rating < 1 || rating > 5) {
         return res.status(400).json({ error: 'Invalid teacher ID or rating. Rating must be a number between 1 and 5.' });
     }
 
-    const teacherId = parseInt(teacher_id);
+    const teacherId = teacher_id;
     const cookieStr = req.headers.cookie?.split('votedTeachers=')[1]?.split(';')[0] || '';
-    const votedArray = cookieStr ? cookieStr.split(',').map(id => parseInt(id.trim())).filter(Boolean) : [];
+    const votedArray = cookieStr ? cookieStr.split(',').map(id => id.trim()).filter(Boolean) : [];
 
-    // Check if the user has NOT voted for this teacher (fixing backwards logic)
     if (votedArray.includes(teacherId)) {
         res.status(400).json({ error: 'You have already voted for this teacher.' });
         return;
     }
 
-    // Add the vote and update the cookie
     ratings.push({ teacher_id: teacherId, rating: parseInt(rating), comment: comment || '' });
     votedArray.push(teacherId);
     setCookie(res, 'votedTeachers', votedArray.join(','), 365);
     console.log('Server - Added rating for teacher:', teacherId, 'Rating:', { rating, comment });
-    console.log('Server - Ratings total:', ratings.length, 'Updated ratings:', ratings);
-
     res.json({ message: 'Rating submitted!' });
 });
 
-// Add a new teacher (admin-only, now via CSV)
 app.post('/api/teachers', authenticateAdmin, (req, res) => {
-    const { name, bio, classes, description, id, tags, room_number } = req.body;
-    if (!name || !bio || !classes || !Array.isArray(classes) || !description || isNaN(id) || !tags || !Array.isArray(tags) || !room_number) {
-        return res.status(400).json({ error: 'Name, bio, classes (as an array), description, ID (number), tags (as an array), and room number are required.' });
+    const { name, bio, classes, description, id, tags, room_number, schedule } = req.body;
+    if (!name || !bio || !classes || !Array.isArray(classes) || !description || !id || !tags || !Array.isArray(tags) || !room_number || !schedule || !Array.isArray(schedule)) {
+        return res.status(400).json({ error: 'Name, bio, classes (as an array), description, ID (string), tags (as an array), room number, and schedule (as an array of objects) are required.' });
     }
-    const newTeacher = { id: parseInt(id), name, description, bio, classes, tags: tags.map(t => t.trim()).filter(t => t), room_number: room_number.trim() };
+    const newTeacher = { 
+        id: id.trim(), 
+        name, 
+        description, 
+        bio, 
+        classes, 
+        tags: tags.map(t => t.trim()).filter(t => t), 
+        room_number: room_number.trim(),
+        schedule: schedule
+    };
     teachers.push(newTeacher);
-    saveTeachersToFile(); // Save to CSV after adding
-    console.log('Server - Added new teacher:', newTeacher.name, 'ID:', newTeacher.id, 'Tags:', newTeacher.tags, 'Room:', newTeacher.room_number);
+    saveTeachersToFile();
+    console.log('Server - Added new teacher:', newTeacher.name, 'ID:', newTeacher.id, 'Tags:', newTeacher.tags, 'Room:', newTeacher.room_number, 'Schedule:', newTeacher.schedule);
     res.json(newTeacher);
 });
 
-// Delete a teacher and their votes (admin-only)
 app.delete('/api/admin/teachers/:id', authenticateAdmin, (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: 'Invalid teacher ID.' });
+    const id = req.params.id;
     const initialTeacherLength = teachers.length;
     const newTeachers = teachers.filter(t => t.id !== id);
     if (newTeachers.length < initialTeacherLength) {
         teachers.length = 0;
         teachers.push(...newTeachers);
-        const newRatings = ratings.filter(r => r.teacher_id !== id); // Remove all votes for this teacher
+        const newRatings = ratings.filter(r => r.teacher_id !== id);
         ratings.length = 0;
         ratings.push(...newRatings);
-        saveTeachersToFile(); // Save to CSV after deletion
+        saveTeachersToFile();
         console.log('Server - Deleted teacher ID:', id, 'Teachers remaining:', teachers.length);
         res.json({ message: 'Teacher and their votes deleted successfully!' });
     } else {
@@ -286,9 +305,39 @@ app.delete('/api/admin/teachers/:id', authenticateAdmin, (req, res) => {
     }
 });
 
+// New endpoint to edit a teacher
+app.put('/api/admin/teachers/:id', authenticateAdmin, (req, res) => {
+    const id = req.params.id;
+    const { name, bio, classes, description, tags, room_number, schedule } = req.body;
+
+    if (!name || !bio || !classes || !Array.isArray(classes) || !description || !tags || !Array.isArray(tags) || !room_number || !schedule || !Array.isArray(schedule)) {
+        return res.status(400).json({ error: 'All fields (name, bio, classes, description, tags, room_number, schedule) are required and must be in the correct format.' });
+    }
+
+    const teacherIndex = teachers.findIndex(t => t.id === id);
+    if (teacherIndex === -1) {
+        return res.status(404).json({ error: 'Teacher not found.' });
+    }
+
+    teachers[teacherIndex] = {
+        id,
+        name,
+        bio,
+        classes,
+        description,
+        tags: tags.map(t => t.trim()).filter(t => t),
+        room_number: room_number.trim(),
+        schedule
+    };
+
+    saveTeachersToFile();
+    console.log('Server - Updated teacher:', id, 'New data:', teachers[teacherIndex]);
+    res.json({ message: 'Teacher updated successfully!', teacher: teachers[teacherIndex] });
+});
+
 app.get('/', (req, res) => {
     console.log('Server - Redirecting to home page...');
-    res.sendFile('index.html', { root: 'pages/home' });
+    res.sendFile(path.join(__dirname, 'pages/home/index.html'));
 });
 
 console.log('Server - Starting server on port', port);
@@ -296,7 +345,6 @@ app.listen(port, () => {
     console.log(`Server running on port ${port} - Version 1.15 - Started at ${new Date().toISOString()}`);
 });
 
-// Helper function to set cookies in the response
 function setCookie(res, name, value, days) {
     const date = new Date();
     date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));

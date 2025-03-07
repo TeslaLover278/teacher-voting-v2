@@ -4,30 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rate Your Teacher</title>
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/public/styles.css">
+    <link rel="icon" type="image/x-icon" href="/public/favicon.ico">
 </head>
 <body>
     <header class="site-header">
         <div class="header-content">
-            <img src="/images/logo.png" alt="Teacher Rating Logo" class="logo" onclick="window.location.href='/'">
-            <h1 class="header-title">Rate Your Teachers</h1>
+            <img src="/public/images/logo.png" alt="Teacher Rating Logo" class="logo" onclick="window.location.href='/'">
+            <h1 class="header-title">Rate Your Teacher</h1>
+            <button class="admin-btn" onclick="window.location.href='/pages/admin/login.html'">Admin Login</button>
         </div>
-        <button class="admin-btn" onclick="window.location.href='/admin/login.html'">Admin</button>
     </header>
-    <div class="controls">
-        <input type="text" id="search-bar" placeholder="Search by name or tags...">
-        <select id="sort-select">
-            <option value="default">Default</option>
-            <option value="alphabetical-asc">Alphabetical (A-Z)</option>
-            <option value="alphabetical-desc">Alphabetical (Z-A)</option>
-            <option value="ratings-asc">Ratings (Low-High)</option>
-            <option value="ratings-desc">Ratings (High-Low)</option>
-        </select>
+    <div class="home-container">
+        <div class="search-sort">
+            <input type="text" id="search-bar" placeholder="Search teachers or tags...">
+            <select id="sort-select">
+                <option value="default">Sort: Default</option>
+                <option value="alphabetical-asc">Sort: A-Z</option>
+                <option value="alphabetical-desc">Sort: Z-A</option>
+                <option value="ratings-asc">Sort: Ratings (Low to High)</option>
+                <option value="ratings-desc">Sort: Ratings (High to Low)</option>
+            </select>
+            <select id="cards-per-page">
+                <option value="8">8 per page</option>
+                <option value="16">16 per page</option>
+                <option value="24">24 per page</option>
+            </select>
+        </div>
+        <div id="teacher-grid"></div>
+        <div id="pagination"></div>
     </div>
-    <div id="teacher-grid" class="teacher-grid"></div>
     <footer class="site-footer">
-        <p>Missing Teacher? Contact <a href="mailto:reagan.hartney@gmail.com">reagan.hartney@gmail.com</a> to add a teacher!</p>
+        <p>Rate Your Teacher © 2025 | <a href="mailto:betterschoolwifi@gmail.com">betterschoolwifi@gmail.com</a></p>
     </footer>
-    <script src="/home/script.js"></script>
+    <div id="notification" class="notification"></div>
+    <script src="/pages/home/index.js" defer></script>
 </body>
 </html>

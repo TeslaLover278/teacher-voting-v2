@@ -3,61 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Profile</title>
-    <link rel="stylesheet" href="/styles.css">
+    <title id="dynamic-title">Teacher Profile</title>
+    <link rel="stylesheet" href="/public/styles.css">
+    <link rel="icon" type="image/x-icon" href="/public/favicon.ico">
 </head>
 <body>
     <header class="site-header">
         <div class="header-content">
-            <img src="/images/logo.png" alt="Teacher Rating Logo" class="logo" onclick="window.location.href='/'">
-            <h1 class="header-title">Rate Your Teachers</h1>
+            <img src="/public/images/logo.png" alt="Teacher Rating Logo" class="logo" onclick="window.location.href='/'">
+            <h1 class="header-title">Teacher Profile</h1>
+            <button class="admin-btn" onclick="window.location.href='/pages/admin/login.html'">Admin Login</button>
         </div>
-        <button class="admin-btn" onclick="window.location.href='/admin/login.html'">Admin</button>
     </header>
-    <div id="notification" class="notification"></div>
-    <main class="teacher-profile-container">
-        <section class="teacher-profile">
-            <h2 id="teacher-title" class="teacher-name"></h2>
-            <p id="teacher-room" class="teacher-room"></p> <!-- New room number -->
-            <div class="teacher-content">
-                <div class="teacher-left">
-                    <div class="teacher-header">
-                        <img id="teacher-photo" src="" alt="Teacher Photo" class="teacher-image">
-                    </div>
-                    <p id="teacher-bio" class="teacher-bio"></p>
-                    <p id="teacher-summary" class="teacher-summary"></p>
-                </div>
-                <div class="teacher-right">
-                    <table id="teacher-classes" class="teacher-schedule"></table>
-                    <div class="rating-section">
-                        <h3 id="rating-heading" class="rating-heading">Your Rating</h3>
-                        <form id="rating-form" class="rating-form">
-                            <div id="star-rating" class="star-rating"></div>
-                            <textarea id="rating-comment" placeholder="Leave a comment (optional)" rows="3"></textarea>
-                            <button type="submit" class="submit-btn">Submit Rating</button>
-                        </form>
-                        <p id="vote-message" class="vote-message" style="display: none; color: #00B7D1;">You have already voted for this teacher.</p>
-                        <h3 class="average-rating">Average Rating: <span id="avg-rating" class="avg-rating"></span> (<span id="vote-count" class="vote-count"></span>)</h3>
-                    </div>
-                    <div id="reviews" class="reviews">
-                        <p><a href="#reviews" id="read-reviews-link" class="reviews-link">Read Reviews</a> | <a href="/" id="back-home-link" class="back-link">Back to Main Page</a></p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+    <div class="teacher-profile-container">
+        <div class="teacher-profile" id="teacher-profile"></div>
+    </div>
     <footer class="site-footer">
-        <p>Missing Teacher? Contact <a href="mailto:reagan.hartney@gmail.com">reagan.hartney@gmail.com</a> to add a teacher!</p>
+        <p>Rate Your Teacher © 2025 | <a href="/cdn-cgi/l/email-protection#264435253544205545454e49494a514f404f66414b474f4a0845494b"><span class="__cf_email__" data-cfemail="4624637272637475656e69696a716f606f46216b676f6a2865696b">[email protected]</span></a></p>
     </footer>
-
-    <!-- Modal for on-page popups -->
+    <div id="notification" class="notification"></div>
     <div id="modal" class="modal">
         <div class="modal-content">
-            <p id="modal-message"></p>
-            <button id="modal-close" class="modal-btn">OK</button>
+            <h2>Confirm Deletion</h2>
+            <p>Are you sure you want to delete this teacher and their votes?</p>
+            <button id="confirm-delete" class="modal-btn">Yes</button>
+            <button id="cancel-delete" class="modal-btn">No</button>
         </div>
     </div>
-
-    <script src="/teacher/teacher.js"></script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+    <script src="/pages/teacher/teacher.js" defer></script>
 </body>
 </html>

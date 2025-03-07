@@ -1,355 +1,581 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
-    font-family: 'Arial', sans-serif;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #E6F0F8; /* Light gray-blue background from logo */
-    color: #000000; /* Black text for readability */
-    position: relative; /* For positioning header */
-    margin-top: 0; /* Reset margin to accommodate header */
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f4f4f4;
+    color: #333;
 }
+
+/* Header Styles */
 .site-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* Space between logo, title, and admin button */
-    padding: 10px 20px;
-    background-color: #FFFFFF; /* White background for header */
-    border-bottom: 1px solid #00B7D1; /* Teal border for header */
-    position: fixed; /* Fix header at the top */
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1000; /* Ensure header stays above other content */
+    background-color: #00B7D1;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
+
 .header-content {
     display: flex;
     align-items: center;
-    gap: 20px;
-    flex-grow: 1; /* Allow header-content to take up remaining space */
-    justify-content: center; /* Center the logo and title */
-}
-.logo {
-    width: 50px; /* Fixed width for logo */
-    height: 50px; /* Fixed height to maintain aspect ratio */
-    object-fit: contain; /* Maintain aspect ratio, scale down if larger */
-    cursor: pointer;
-}
-.logo:hover {
-    opacity: 0.8;
-}
-.header-title {
-    margin: 0; /* Remove default margins */
-    font-size: 1.5em; /* Smaller title size for header */
-    color: #000000; /* Black text */
-    flex-grow: 0; /* Prevent title from growing too much */
-    text-align: center; /* Center the title */
-}
-.admin-btn, .logout-btn {
-    padding: 10px 15px; /* Increased padding for visibility */
-    background-color: #00B7D1; /* Teal for admin button */
-    color: #FFFFFF; /* White text */
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
-    margin-left: 30px; /* Reduced margin to move left more */
-    margin-right: 50px; /* Space from edge */
-}
-.admin-btn:hover, .logout-btn:hover {
-    background-color: #0078D4; /* Blue for hover state */
-}
-.teacher-profile-container {
-    margin-left: 0; /* Reset margin since header handles positioning */
-    margin-top: 100px; /* Increased to move content down further, adjust if needed */
-}
-.teacher-profile {
-    background-color: #FFFFFF; /* White background for profile */
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-}
-.teacher-name {
-    text-align: center;
-    font-size: 2em;
-    color: #000000; /* Black text for title */
-    margin-bottom: 20px;
-}
-.teacher-content {
-    display: flex;
-    gap: 20px;
     justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
 }
-.teacher-left {
-    flex: 1;
-    max-width: 300px; /* Limit width of left section */
-}
-.teacher-right {
-    flex: 2;
-    max-width: 600px; /* Limit width of right section */
-}
-.teacher-header {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-.teacher-image {
-    width: 250px; /* Increased width for larger photo */
-    height: 250px; /* Increased height to maintain aspect ratio */
-    object-fit: contain; /* Maintain aspect ratio, scale down if larger */
-    border-radius: 8px;
-}
-.teacher-bio, .teacher-summary {
-    margin: 20px 0;
-    color: #000000; /* Black text for bio/summary */
-    text-align: left; /* Justify text for paragraph-like appearance */
-}
-.teacher-summary {
-    font-style: italic; /* Italicize summary for distinction */
-    margin-top: 10px; /* Space above summary */
-}
-.teacher-schedule {
-    border-collapse: collapse;
-    margin: 20px 0;
-    width: 100%; /* Ensure table fills right section */
-}
-.schedule-header, .schedule-cell {
-    border: 1px solid #00B7D1; /* Teal border for table */
-    padding: 10px;
-    width: 120px; /* Adjusted for blocks and schedule layout */
-    background-color: #FFFFFF; /* White background for cells */
-    text-align: center;
-}
-.rating-section {
-    margin-top: 20px;
-    background-color: #FFFFFF; /* White background for rating section */
-    padding: 15px;
-    border: 1px solid #00B7D1; /* Teal border for rating section */
-    border-radius: 8px;
-    display: flex; /* Added */
-    flex-direction: column; /* Added */
-    align-items: center; /* Center horizontally */
-}
-.rating-heading {
-    text-align: center;
-    color: #000000; /* Black text for heading */
-    margin-bottom: 10px;
-}
-.rating-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-width: 400px;
-    width: 100%; /* Ensure it takes full available width */
-    align-items: center; /* Center form elements */
-}
-.star-rating {
-    font-size: 24px;
+
+.logo {
+    height: 40px;
     cursor: pointer;
-    text-align: center;
-    margin-bottom: 10px; /* Added spacing */
 }
-.star {
-    color: #ADB5BD; /* Gray for unselected stars */
+
+.header-title {
+    color: white;
+    font-size: 1.5rem;
 }
-.star.selected {
-    color: #00B7D1; /* Teal for selected stars */
-}
-#rating-comment {
-    width: 100%; /* Full width of form */
-    max-width: 350px; /* Limit width */
-    padding: 5px;
-    border: 1px solid #00B7D1;
-    border-radius: 4px;
-    resize: vertical; /* Allow vertical resizing only */
-}
-.submit-btn {
-    padding: 10px;
-    background-color: #00B7D1; /* Teal for buttons */
-    color: #FFFFFF; /* White text */
+
+.admin-btn {
+    background-color: #fff;
+    color: #00B7D1;
     border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
     cursor: pointer;
-    border-radius: 4px;
-    width: 100%;
+    font-size: 1rem;
+    transition: background-color 0.3s;
 }
-.submit-btn:hover {
-    background-color: #0078D4; /* Blue for hover state */
+
+.admin-btn:hover {
+    background-color: #e0e0e0;
 }
-.vote-message {
-    margin-top: 10px;
-    font-weight: bold;
-    text-align: center;
-}
-.average-rating {
-    text-align: center;
-    margin-top: 10px;
-    color: #000000; /* Black text for average rating */
-}
-.avg-rating, .vote-count {
-    font-weight: bold;
-}
-.reviews {
-    margin-top: 20px;
-}
-.review-item {
-    border: 1px solid #00B7D1; /* Teal border for reviews */
-    padding: 10px;
-    margin-bottom: 10px;
-    background-color: #FFFFFF; /* White background for reviews */
-    border-radius: 4px;
-    display: flex; /* Added to align stars and comment side by side */
-    align-items: center; /* Center vertically */
-    gap: 10px; /* Space between stars and comment */
-}
-.review-item strong {
-    flex-shrink: 0; /* Prevent stars from shrinking */
-}
-.review-item span {
-    flex-grow: 1; /* Allow comment to grow and wrap */
-}
-.reviews-link, .back-link {
-    margin-right: 10px;
-    text-decoration: underline;
-    color: #00B7D1; /* Teal for links */
-}
-.reviews-link:hover, .back-link:hover {
-    color: #0078D4; /* Blue for hover state */
-}
+
+/* Footer Styles */
 .site-footer {
     text-align: center;
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #FFFFFF; /* White background for footer */
-    border-top: 1px solid #00B7D1; /* Teal border for footer */
-    color: #000000; /* Black text for footer */
+    padding: 1rem;
+    background-color: #00B7D1;
+    color: white;
+    position: relative;
+    bottom: 0;
+    width: 100%;
 }
+
 .site-footer a {
-    color: #00B7D1; /* Teal for link */
+    color: #fff;
+    text-decoration: none;
+}
+
+.site-footer a:hover {
     text-decoration: underline;
 }
-.site-footer a:hover {
-    color: #0078D4; /* Blue for hover state */
+
+/* Notification Styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem;
+    color: white;
+    border-radius: 5px;
+    z-index: 1000;
+    display: none;
 }
-.controls {
-    margin-bottom: 20px;
+
+/* Homepage Styles */
+.home-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.search-sort {
     display: flex;
-    gap: 10px;
-    margin-top: 100px; /* Increased to move down below header, adjust if needed */
-    padding: 15px; /* Increased padding for visibility */
-    background-color: #FFFFFF; /* White background for controls */
-    border: 1px solid #00B7D1; /* Teal border for controls */
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for elevation */
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
-#search-bar, #sort-select {
-    padding: 5px;
-    font-size: 16px;
-    border: 1px solid #00B7D1; /* Teal border from logo */
-    border-radius: 4px;
-    background-color: #FFFFFF; /* White background for inputs */
+
+#search-bar {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    min-width: 200px;
 }
-.teacher-grid {
+
+#sort-select, #cards-per-page {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+#teacher-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    padding: 15px; /* Increased padding for visibility */
-    margin-top: 20px; /* Additional space below controls */
-    background-color: #FFFFFF; /* White background for grid */
-    border: 1px solid #00B7D1; /* Teal border for grid */
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for elevation */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
 }
+
 .teacher-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
     text-align: center;
+    padding: 1rem;
+    transition: transform 0.3s;
     cursor: pointer;
-    background-color: #FFFFFF; /* White background for cards */
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #00B7D1; /* Teal border for cards */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+.teacher-card:hover {
+    transform: translateY(-5px);
+}
+
 .teacher-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.teacher-card h3 {
+    margin: 0.5rem 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.teacher-card p {
+    margin: 0.3rem 0;
+    color: #666;
+}
+
+.stars {
+    color: #FFD700;
+    margin: 0.5rem 0;
+}
+
+.view-profile {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #00B7D1;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.view-profile:hover {
+    background-color: #009bb5;
+}
+
+#pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    gap: 0.5rem;
+}
+
+.pagination-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.pagination-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.pagination-btn.active {
+    background-color: #00B7D1;
+    color: white;
+    border-color: #00B7D1;
+}
+
+.pagination-btn:disabled {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+}
+
+/* Teacher Profile Styles */
+.teacher-profile-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.teacher-profile {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+}
+
+.teacher-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.teacher-image {
     width: 150px;
     height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+}
+
+.teacher-name {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.teacher-room {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.teacher-content {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.teacher-left, .teacher-right {
+    flex: 1;
+    min-width: 300px;
+}
+
+.teacher-bio {
+    margin-bottom: 1rem;
+    color: #666;
+}
+
+.teacher-classes {
+    margin-bottom: 1rem;
+}
+
+.average-rating {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.avg-rating {
+    color: #FFD700;
+    font-weight: bold;
+    margin-left: 0.5rem;
+}
+
+.vote-count {
+    color: #666;
+    margin-left: 0.5rem;
+}
+
+.ratings-chart {
+    margin-bottom: 2rem;
+}
+
+.rating-heading {
+    margin-bottom: 1rem;
+    color: #333;
+    font-size: 1.2rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chart {
+    max-width: 100%;
+}
+
+.chart-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.chart-label {
+    width: 50px;
+    color: #666;
+}
+
+.chart-bar-container {
+    flex: 1;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    height: 20px;
+    overflow: hidden;
+}
+
+.chart-bar {
+    background-color: #FFD700;
+    height: 100%;
+    transition: width 0.5s;
+}
+
+.chart-count {
+    width: 50px;
+    text-align: right;
+    color: #666;
+}
+
+.rating-section {
+    margin-bottom: 2rem;
+}
+
+.star-rating {
+    margin-bottom: 1rem;
+}
+
+.star {
+    font-size: 2rem;
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.star.selected {
+    color: #FFD700;
+}
+
+#rating-comment {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    resize: vertical;
+    margin-bottom: 1rem;
+}
+
+.submit-btn {
+    background-color: #00B7D1;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+    background-color: #009bb5;
+}
+
+.reviews {
+    margin-bottom: 2rem;
+}
+
+.toggle-btn {
+    background-color: #e0e0e0;
+    border: none;
+    padding: 0.3rem 0.6rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+}
+
+.toggle-btn:hover {
+    background-color: #d0d0d0;
+}
+
+.sort-select {
+    padding: 0.3rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.9rem;
+}
+
+.reviews-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.review-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.review-item:last-child {
+    border-bottom: none;
+}
+
+.review-item strong {
+    color: #FFD700;
+    margin-right: 0.5rem;
+}
+
+/* Schedule Styles */
+.schedule-section {
+    margin-bottom: 2rem;
+}
+
+.schedule-heading {
+    margin-bottom: 1rem;
+    color: #333;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.schedule-table th,
+.schedule-table td {
+    padding: 0.75rem;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.schedule-table th {
+    background-color: #00B7D1;
+    color: white;
+    font-weight: 600;
+}
+
+.schedule-table td {
+    background-color: #fff;
+}
+
+/* Admin Dashboard Styles */
+.admin-dashboard-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.admin-section {
+    background-color: #fff;
     border-radius: 10px;
-    object-fit: contain; /* Maintain aspect ratio for teacher cards on main page */
-}
-.teacher-card h3 {
-    margin: 10px 0 5px;
-    color: #000000; /* Black text for name */
-}
-.teacher-card p {
-    margin: 5px 0;
-    font-size: 14px;
-    color: #000000; /* Black text for bio */
-}
-.stars {
-    margin: 5px 0;
-    font-size: 16px; /* Ensure stars are readable */
-}
-.view-profile {
-    display: block;
-    margin-top: 10px;
-    text-decoration: underline;
-    color: #00B7D1; /* Teal for link */
-}
-.view-profile:hover {
-    color: #0078D4; /* Blue for hover state */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
 }
 
-/* Responsive design for different screen sizes */
-@media (max-width: 1024px) {
-    .teacher-grid {
-        grid-template-columns: repeat(3, 1fr); /* 3 columns on tablets */
-    }
-    .teacher-content {
-        flex-direction: column; /* Stack on tablets */
-        align-items: center;
-    }
-    .teacher-left, .teacher-right {
-        max-width: 100%; /* Full width on tablets */
-    }
+.admin-section h3 {
+    margin-bottom: 1rem;
+    color: #333;
 }
 
-@media (max-width: 768px) {
-    .teacher-grid {
-        grid-template-columns: repeat(2, 1fr); /* 2 columns on smaller tablets */
-    }
-    .site-header {
-        padding: 5px 10px; /* Reduce padding on smaller screens */
-    }
-    .header-title {
-        font-size: 1.2em; /* Smaller title on mobile */
-    }
-    .admin-btn, .logout-btn {
-        padding: 8px 12px; /* Smaller buttons on mobile */
-        margin-left: 5px; /* Adjust button spacing */
-        margin-right: 5px;
-    }
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
-@media (max-width: 480px) {
-    .teacher-grid {
-        grid-template-columns: 1fr; /* 1 column on mobile */
-    }
-    .controls {
-        flex-direction: column; /* Stack controls on mobile */
-        gap: 10px;
-        padding: 10px;
-        margin-top: 80px; /* Adjust for smaller header */
-    }
-    #search-bar, #sort-select {
-        width: 100%; /* Full width on mobile */
-    }
-    .teacher-card img {
-        width: 100px;
-        height: 100px; /* Smaller images on mobile */
-    }
-    .teacher-image {
-        width: 200px;
-        height: 200px; /* Smaller teacher photo on mobile */
-    }
+.form-group {
+    display: flex;
+    flex-direction: column;
 }
 
-/* Modal styles */
+.form-group label {
+    margin-bottom: 0.3rem;
+    color: #333;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group textarea {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.schedule-inputs {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.schedule-block {
+    flex: 1;
+    min-width: 200px;
+}
+
+.schedule-block h5 {
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.admin-table th {
+    background-color: #00B7D1;
+    color: white;
+    font-weight: 600;
+}
+
+.admin-table td {
+    background-color: #fff;
+}
+
+.admin-table input[type="number"],
+.admin-table input[type="text"] {
+    width: 100%;
+    padding: 0.3rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.delete-btn, .update-btn {
+    padding: 0.3rem 0.6rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.delete-btn {
+    background-color: #FF0000;
+    color: white;
+    margin-left: 0.5rem;
+}
+
+.delete-btn:hover {
+    background-color: #cc0000;
+}
+
+.update-btn {
+    background-color: #00B7D1;
+    color: white;
+}
+
+.update-btn:hover {
+    background-color: #009bb5;
+}
+
+/* Modal Styles */
 .modal {
     display: none;
     position: fixed;
@@ -357,103 +583,90 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
-    z-index: 1001; /* Above header */
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
 }
+
 .modal-content {
-    background-color: #FFFFFF; /* White background */
-    margin: 15% auto; /* Centered vertically */
-    padding: 20px;
-    border: 1px solid #00B7D1; /* Teal border */
-    border-radius: 8px;
-    width: 80%;
-    max-width: 400px; /* Limit width for readability */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+    background-color: #fff;
+    max-width: 400px;
+    margin: 15% auto;
+    padding: 2rem;
+    border-radius: 10px;
     text-align: center;
 }
-#modal-message {
-    color: #000000; /* Black text */
-    margin-bottom: 20px;
+
+.modal-content h2 {
+    margin-bottom: 1rem;
+    color: #333;
 }
+
+.modal-content p {
+    margin-bottom: 2rem;
+    color: #666;
+}
+
 .modal-btn {
-    padding: 10px 20px;
-    background-color: #00B7D1; /* Teal for modal button */
-    color: #FFFFFF; /* White text */
+    padding: 0.5rem 1rem;
     border: none;
+    border-radius: 5px;
     cursor: pointer;
-    border-radius: 4px;
-    margin: 0 5px; /* Space between Yes/No buttons if used */
-}
-.modal-btn:hover {
-    background-color: #0078D4; /* Blue for hover state */
+    margin: 0 0.5rem;
+    transition: background-color 0.3s;
 }
 
-/* Notification styles */
-.notification {
-    display: none;
-    position: fixed;
-    top: 80px; /* Below the header */
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 10px 20px;
-    background-color: #00B7D1; /* Teal background */
-    color: #FFFFFF; /* White text */
-    border-radius: 4px;
-    z-index: 1002; /* Above header and modal */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+#confirm-delete {
+    background-color: #FF0000;
+    color: white;
 }
+
+#confirm-delete:hover {
+    background-color: #cc0000;
+}
+
+#cancel-delete {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+#cancel-delete:hover {
+    background-color: #d0d0d0;
+}
+
+/* Error and Info Messages */
 .error-message {
-    color: #DC3545; /* Red for error messages */
-    text-align: center;
+    color: #FF0000;
+    margin-top: 0.5rem;
 }
 
-/* Admin-specific styles */
-.admin-container {
-    margin-top: 100px; /* Adjust for fixed header */
-    padding: 20px;
+.info-message {
+    color: #00B7D1;
+    margin-top: 0.5rem;
 }
-.admin-section {
-    margin-bottom: 30px;
-}
-.admin-list {
-    margin-top: 15px;
-}
-.admin-item {
-    background-color: #FFFFFF;
-    border: 1px solid #00B7D1;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.admin-actions button {
-    margin-right: 10px;
+.edit-btn {
+    background-color: #FFD700; /* Gold for edit */
+    color: #000;
     padding: 5px 10px;
-    background-color: #00B7D1;
-    color: #FFFFFF;
     border: none;
     cursor: pointer;
-    border-radius: 4px;
+    margin-right: 5px;
 }
-.admin-actions button:hover {
-    background-color: #0078D4;
+
+.edit-row {
+    background-color: #f9f9f9;
 }
-.admin-form {
+
+.edit-teacher-form {
+    padding: 10px;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    max-width: 500px;
 }
-.admin-form input, .admin-form button {
-    padding: 8px;
-    border: 1px solid #00B7D1;
-    border-radius: 4px;
-}
-.admin-form button {
-    background-color: #00B7D1;
-    color: #FFFFFF;
+
+.cancel-btn {
+    background-color: #FF0000; /* Red for cancel */
+    color: #fff;
+    padding: 5px 10px;
+    border: none;
     cursor: pointer;
-}
-.admin-form button:hover {
-    background-color: #0078D4;
 }

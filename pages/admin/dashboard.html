@@ -4,38 +4,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/public/styles.css">
+    <link rel="icon" type="image/x-icon" href="/public/favicon.ico">
 </head>
 <body>
     <header class="site-header">
         <div class="header-content">
-            <img src="/images/logo.png" alt="Teacher Rating Logo" class="logo" onclick="window.location.href='/'">
-            <h1 class="header-title">Rate Your Teachers</h1>
+            <img src="/public/images/logo.png" alt="Admin Logo" class="logo" onclick="window.location.href='/'">
+            <h1 class="header-title">Admin Dashboard</h1>
+            <button class="admin-btn" onclick="window.location.href='/'">Back to Home</button>
         </div>
-        <button class="logout-btn" onclick="logout()">Logout</button>
     </header>
-    <div class="admin-container">
-        <section class="admin-section">
-            <h2>Manage Teachers</h2>
-            <div class="admin-list" id="teacher-list"></div>
-            <form id="add-teacher-form" class="admin-form">
-                <input type="text" id="teacher-name" placeholder="Teacher Name" required>
-                <input type="text" id="teacher-description" placeholder="Teacher Description" required>
-                <input type="text" id="teacher-bio" placeholder="Teacher Bio" required>
-                <input type="text" id="teacher-classes" placeholder="Classes (comma-separated)" required>
-                <input type="number" id="teacher-id" placeholder="Teacher ID" required>
-                <input type="text" id="teacher-tags" placeholder="Tags (comma-separated)" required>
-                <button type="submit">Add Teacher</button>
+    <div class="admin-dashboard-container">
+        <div class="admin-section">
+            <h3>Manage Teachers</h3>
+            <form id="teacher-form" class="admin-form">
+                <div class="form-group">
+                    <label for="teacher-id">Teacher ID:</label>
+                    <input type="text" id="teacher-id" name="id" required>
+                </div>
+                <div class="form-group">
+                    <label for="teacher-name">Name:</label>
+                    <input type="text" id="teacher-name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="teacher-bio">Bio:</label>
+                    <textarea id="teacher-bio" name="bio" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="teacher-description">Description:</label>
+                    <input type="text" id="teacher-description" name="description" required>
+                </div>
+                <div class="form-group">
+                    <label for="teacher-classes">Classes (comma-separated):</label>
+                    <input type="text" id="teacher-classes" name="classes" required>
+                </div>
+                <div class="form-group">
+                    <label for="teacher-tags">Tags (comma-separated):</label>
+                    <input type="text" id="teacher-tags" name="tags" required>
+                </div>
+                <div class="form-group">
+                    <label for="teacher-room">Room Number:</label>
+                    <input type="text" id="teacher-room" name="room_number" required>
+                </div>
+                <div class="schedule-inputs">
+                    <div class="schedule-block">
+                        <h5>Block 1</h5>
+                        <input type="text" name="schedule[0][subject]" placeholder="Subject">
+                        <input type="text" name="schedule[0][grade]" placeholder="Grade">
+                    </div>
+                    <div class="schedule-block">
+                        <h5>Block 2</h5>
+                        <input type="text" name="schedule[1][subject]" placeholder="Subject">
+                        <input type="text" name="schedule[1][grade]" placeholder="Grade">
+                    </div>
+                    <div class="schedule-block">
+                        <h5>Block 3</h5>
+                        <input type="text" name="schedule[2][subject]" placeholder="Subject">
+                        <input type="text" name="schedule[2][grade]" placeholder="Grade">
+                    </div>
+                    <div class="schedule-block">
+                        <h5>Block 4</h5>
+                        <input type="text" name="schedule[3][subject]" placeholder="Subject">
+                        <input type="text" name="schedule[3][grade]" placeholder="Grade">
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">Add Teacher</button>
             </form>
-        </section>
-        <section class="admin-section">
-            <h2>Manage Votes</h2>
-            <div class="admin-list" id="vote-list"></div>
-        </section>
+            <div id="teachers-table"></div>
+            <p class="info-message" id="teacher-message"></p>
+        </div>
+        <div class="admin-section">
+            <h3>Manage Votes</h3>
+            <div id="votes-table"></div>
+            <p class="info-message" id="vote-message"></p>
+        </div>
     </div>
     <footer class="site-footer">
-        <p>Missing Teacher? Contact <a href="mailto:reagan.hartney@gmail.com">reagan.hartney@gmail.com</a> to add a teacher!</p>
+        <p>Rate Your Teacher © 2025 | <a href="mailto:betterschoolwifi@gmail.com">betterschoolwifi@gmail.com</a></p>
     </footer>
-    <script src="/admin/dashboard.js"></script>
+    <div id="notification" class="notification"></div>
+    <script src="/pages/admin/dashboard.js" defer></script>
 </body>
 </html>

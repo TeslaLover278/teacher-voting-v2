@@ -1,254 +1,383 @@
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
+    const teacherProfile = document.getElementById('teacher-profile');
+    const notification = document.getElementById('notification');
+    const modal = document.getElementById('modal');
+    const confirmDelete = document.getElementById('confirm-delete');
+    const cancelDelete = document.getElementById('cancel-delete');
+    const dynamicTitle = document.getElementById('dynamic-title');
     const urlParams = new URLSearchParams(window.location.search);
-    const teacherId = urlParams.get('id');
+    const teacherIdParam = urlParams.get('id');
 
-    // Modal and notification functions
-    function showModal(message) {
-        const modal = document.getElementById('modal');
-        const modalMessage = document.getElementById('modal-message');
-        modalMessage.textContent = message;
-        modal.style.display = 'block';
+    const teacherId = teacherIdParam ? teacherIdParam.trim() : null;
+    if (!teacherId) {
+        console.error('Client - Invalid or missing teacher ID from URL:', teacherIdParam);
+        if (teacherProfile) {
+            teacherProfile.innerHTML = '<p class="error-message">Invalid teacher ID. Please use a valid URL (e.g., ?id=Mr.%20O%27Brien).</p>';
+        }
+        return;
+    }
+
+    // Only require teacherProfile and notification
+    const criticalElements = { teacherProfile, notification };
+    const missingCritical = Object.entries(criticalElements)
+        .filter(([key, element]) => !element)
+        .map(([key]) => key);
+
+    if (missingCritical.length > 0) {
+        console.error('Client - Missing critical DOM elements:', missingCritical.join(', '));
+        if (teacherProfile) {
+            teacherProfile.innerHTML = '<p class="error-message">Error: Missing critical elements on the page.</p>';
+        }
+        return;
+    }
+
+    // Log optional elements for debugging
+    const optionalElements = { modal, confirmDelete, cancelDelete, dynamicTitle };
+    const missingOptional = Object.entries(optionalElements)
+        .filter(([key, element]) => !element)
+        .map(([key]) => key);
+    if (missingOptional.length > 0) {
+        console.warn('Client - Missing optional DOM elements (functionality may be limited):', missingOptional.join(', '));
+    }
+
+    let isAdmin = document.cookie.split('; ').find(row => row.startsWith('adminToken='))?.split('=')[1] === 'admin-token';
+    let teacherRatings = [];
+    let hasVoted = false;
+
+    const cookies = document.cookie.split('; ').reduce((acc, cookie) => {
+        const [name, value] = cookie.split('=');
+        acc[name] = value;
+        return acc;
+    }, {});
+    const votedTeachers = cookies['votedTeachers'] ? cookies['votedTeachers'].split(',').map(id => id.trim()) : [];
+    hasVoted = votedTeachers.includes(teacherId);
+
+    // Add logout button dynamically if admin
+    const headerContent = document.querySelector('.header-content');
+    if (isAdmin) {
+        const logoutBtn = document.createElement('button');
+        logoutBtn.id = 'logout-btn';
+        logoutBtn.className = 'admin-btn';
+        logoutBtn.textContent = 'Logout';
+        logoutBtn.style.display = 'inline-block';
+        logoutBtn.addEventListener('click', () => {
+            document.cookie = 'adminToken=; Max-Age=0; Path=/';
+            window.location.href = '/';
+        });
+        headerContent.appendChild(logoutBtn);
+    }
+
+    function showNotification(message, isError = false) {
+        notification.textContent = message;
+        notification.style.display = 'block';
+        notification.style.backgroundColor = isError ? '#FF0000' : '#00B7D1';
+        setTimeout(() => notification.style.display = 'none', 3000);
+    }
+
+    function showModal() {
+        if (modal) modal.style.display = 'block';
+        else console.warn('Client - Modal not available for delete confirmation');
     }
 
     function hideModal() {
-        const modal = document.getElementById('modal');
-        modal.style.display = 'none';
+        if (modal) modal.style.display = 'none';
     }
 
-    function showNotification(message) {
-        const notification = document.getElementById('notification');
-        notification.textContent = message;
-        notification.style.display = 'block';
-        setTimeout(() => {
-            notification.style.display = 'none';
-        }, 5000); // Hide after 5 seconds
-    }
+    window.handleImageError = function(imgElement, defaultAlt) {
+        imgElement.onerror = null;
+        imgElement.src = '/public/images/default-teacher.jpg';
+        imgElement.alt = defaultAlt;
+    };
 
-    document.getElementById('modal-close').addEventListener('click', hideModal);
-
-    async function loadTeacher() {
+    async function loadTeacherProfile() {
         try {
-            const response = await fetch(`/api/teachers/${teacherId}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
-            }
+            const response = await fetch(`/api/teachers/${encodeURIComponent(teacherId)}`, { credentials: 'include' });
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const teacher = await response.json();
-            
-            console.log('Client - Fetched data for teacher', teacherId);
-            console.log('Client - Avg rating:', teacher.avg_rating || 'No ratings', 'Votes:', teacher.rating_count, 'Raw ratings:', teacher.ratings);
+            teacherRatings = teacher.ratings || [];
 
-            // Use a local file path for the teacher photo based on teacher ID, with fallback
-            const teacherPhotoPath = `/images/teacher${teacher.id}.jpg`;
-            const img = document.getElementById('teacher-photo');
-            img.src = teacherPhotoPath;
-            img.onerror = () => {
-                console.error('Client - Image load error for:', teacherPhotoPath);
-                img.src = '/images/default-teacher.jpg'; // Fallback image if teacher photo fails
-                img.alt = `Default image for ${teacher.name}`; // Update alt text for accessibility
-            };
+            const escapedName = teacher.name.replace(/'/g, "\\'").replace(/"/g, '\\"');
+            if (dynamicTitle) dynamicTitle.textContent = `${escapedName} - Teacher Profile`;
+            else document.title = `${escapedName} - Teacher Profile`; // Fallback
 
-            document.getElementById('teacher-title').textContent = teacher.name; // Set name as title
-            document.getElementById('teacher-room').textContent = `Room: ${teacher.room_number}`; // Show room number
-            document.getElementById('teacher-bio').textContent = teacher.bio || 'No bio available.'; // Show bio
-            // Only show summary if available, otherwise hide it
-            const summaryElement = document.getElementById('teacher-summary');
-            if (teacher.summary) {
-                summaryElement.textContent = teacher.summary;
-            } else {
-                summaryElement.style.display = 'none';
+            const ratingDistribution = calculateRatingDistribution(teacherRatings);
+            const imageName = teacher.id.replace(/[^a-zA-Z0-9]/g, '');
+
+            teacherProfile.innerHTML = `
+                <div class="teacher-header">
+                    <img src="/public/images/teacher${imageName}.jpg" alt="${escapedName} Profile" class="teacher-image" onerror="handleImageError(this, 'Default image for ${escapedName}')">
+                    <h2 class="teacher-name">${escapedName}</h2>
+                    <p class="teacher-room">Room: ${teacher.room_number}</p>
+                </div>
+                <div class="teacher-content">
+                    <div class="teacher-left">
+                        <p class="teacher-bio">${teacher.bio}</p>
+                        <div class="schedule-section">
+                            <h3 class="schedule-heading">Schedule</h3>
+                            <table class="schedule-table">
+                                <thead>
+                                    <tr>
+                                        <th>Block</th>
+                                        <th>Subject</th>
+                                        <th>Grade</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${generateScheduleRows(teacher.schedule)}
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="teacher-classes"><strong>Classes:</strong> ${teacher.classes.join(', ')}</p>
+                        <p><strong>Tags:</strong> ${teacher.tags.join(', ')}</p>
+                    </div>
+                    <div class="teacher-right">
+                        <div class="average-rating">
+                            <span>Average Rating: </span><span class="avg-rating">${teacher.avg_rating ? teacher.avg_rating.toFixed(1) : 'N/A'}</span>
+                            <span class="vote-count">(${teacher.rating_count || 0} votes)</span>
+                        </div>
+                        <div class="ratings-chart">
+                            <h3 class="rating-heading">Rating Distribution</h3>
+                            ${generateRatingsChart(ratingDistribution)}
+                        </div>
+                        ${!hasVoted ? `
+                        <div class="rating-section">
+                            <h3 class="rating-heading">Rate This Teacher</h3>
+                            <div class="rating-form" id="rating-form">
+                                <div class="star-rating" id="star-rating"></div>
+                                <textarea id="rating-comment" placeholder="Add a comment (optional)"></textarea>
+                                <button class="submit-btn" id="submit-rating">Submit Rating</button>
+                            </div>
+                        </div>
+                        ` : `
+                        <div class="rating-section">
+                            <h3 class="rating-heading">Rate This Teacher</h3>
+                            <p class="info-message">You have already voted for this teacher.</p>
+                        </div>
+                        `}
+                        <div class="reviews">
+                            <h3 class="rating-heading">
+                                Reviews
+                                <button id="toggle-reviews" class="toggle-btn">Show All</button>
+                            </h3>
+                            <select id="sort-reviews" class="sort-select" style="display: none;">
+                                <option value="rating-desc">Highest to Lowest</option>
+                                <option value="rating-asc">Lowest to Highest</option>
+                            </select>
+                            <div id="reviews-list" class="reviews-list">
+                                ${teacherRatings.length > 0 ? renderFirstReview(teacherRatings) : '<p>No reviews yet.</p>'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ${isAdmin && modal && confirmDelete && cancelDelete ? '<button class="submit-btn" id="delete-teacher">Delete Teacher</button>' : ''}
+            `;
+
+            if (isAdmin && modal && confirmDelete && cancelDelete) {
+                document.getElementById('delete-teacher').addEventListener('click', showModal);
             }
 
-            // Show stars based on avg_rating, default to no stars if no ratings
-            const stars = teacher.avg_rating !== null && teacher.rating_count > 0 
-                ? `${'★'.repeat(Math.round(teacher.avg_rating))}${'☆'.repeat(5 - Math.round(teacher.avg_rating))}`
-                : '☆☆☆☆☆';
-            const voteCount = teacher.rating_count || 0;
-            document.getElementById('avg-rating').innerHTML = stars;
-            document.getElementById('vote-count').textContent = `(${voteCount})`; // Changed to (x)
-            console.log('Client - Displayed rating:', stars, 'Votes:', voteCount);
+            renderStars();
+            setupReviews(teacherRatings);
 
-            const table = document.getElementById('teacher-classes');
-            table.innerHTML = ''; // Clear existing table
-            
-            // Create 3 rows: Blocks, Classes, Grade Levels
-            const blockRow = table.insertRow();
-            const classRow = table.insertRow();
-            const gradeRow = table.insertRow();
+            const toggleReviewsBtn = document.getElementById('toggle-reviews');
+            const reviewsList = document.getElementById('reviews-list');
+            const sortReviews = document.getElementById('sort-reviews');
+            if (toggleReviewsBtn && reviewsList && sortReviews) {
+                toggleReviewsBtn.addEventListener('click', () => {
+                    const isExpanded = reviewsList.classList.contains('expanded');
+                    if (!isExpanded) {
+                        reviewsList.innerHTML = renderAllReviews(teacherRatings, sortReviews.value);
+                        reviewsList.classList.add('expanded');
+                        toggleReviewsBtn.textContent = 'Hide';
+                        sortReviews.style.display = 'block';
+                    } else {
+                        reviewsList.innerHTML = renderFirstReview(teacherRatings);
+                        reviewsList.classList.remove('expanded');
+                        toggleReviewsBtn.textContent = 'Show All';
+                        sortReviews.style.display = 'none';
+                    }
+                });
 
-            for (let i = 1; i <= 4; i++) {
-                // Blocks row (Headers)
-                const blockCell = blockRow.insertCell();
-                blockCell.textContent = `Block ${i}`;
-                blockCell.className = 'schedule-header';
-
-                // Classes row
-                const classCell = classRow.insertCell();
-                classCell.textContent = teacher.classes[i - 1] || 'N/A';
-                classCell.className = 'schedule-cell';
-
-                // Grade Levels row (Infer based on class names)
-                const gradeCell = gradeRow.insertCell();
-                const grade = getGradeLevel(teacher.classes[i - 1] || 'N/A');
-                gradeCell.textContent = grade || 'N/A';
-                gradeCell.className = 'schedule-cell';
+                sortReviews.addEventListener('change', () => {
+                    if (reviewsList.classList.contains('expanded')) {
+                        reviewsList.innerHTML = renderAllReviews(teacherRatings, sortReviews.value);
+                    }
+                });
             }
 
-            const reviewsDiv = document.getElementById('reviews');
-            reviewsDiv.innerHTML = ''; // Clear existing reviews
-            teacher.ratings.forEach(r => {
-                const div = document.createElement('div');
-                div.className = 'review-item';
-                div.innerHTML = `<strong>${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</strong><span>${r.comment || 'No comment provided.'}</span>`; // Show comment next to stars
-                reviewsDiv.appendChild(div);
-            });
-
-            const cookieStr = getCookie('votedTeachers') || '';
-            const votedArray = cookieStr ? cookieStr.split(',').map(id => parseInt(id.trim())).filter(Boolean) : [];
-            const hasVoted = votedArray.includes(parseInt(teacherId)); // Check if user has voted
-
-            const ratingForm = document.getElementById('rating-form');
-            const ratingHeading = document.getElementById('rating-heading');
-            const voteMessage = document.getElementById('vote-message');
-            if (hasVoted) {
-                ratingForm.style.display = 'none'; // Hide form if already voted
-                ratingHeading.style.display = 'none';
-                voteMessage.style.display = 'block'; // Show message indicating they’ve already voted
-                console.log('Client - User has already voted for teacher', teacherId);
-            } else {
-                ratingForm.style.display = 'block';
-                ratingHeading.style.display = 'block';
-                voteMessage.style.display = 'none';
-                console.log('Client - Form shown for new vote for teacher', teacherId);
+            if (!hasVoted) {
+                document.getElementById('submit-rating').addEventListener('click', submitRating);
             }
-
-            document.querySelector('.logo').addEventListener('click', () => {
-                window.location.href = '/';
-            });
         } catch (error) {
-            console.error('Client - Error loading teacher:', error.message);
-            if (error.message.includes('HTTP error')) {
-                showModal('Error loading teacher data. Please try again.');
+            console.error('Client - Error loading teacher profile:', error.message);
+            teacherProfile.innerHTML = '<p class="error-message">Error loading teacher profile. Please try again later.</p>';
+        }
+    }
+
+    function calculateRatingDistribution(ratings) {
+        const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+        ratings.forEach(rating => {
+            if (rating.rating >= 1 && rating.rating <= 5) {
+                distribution[rating.rating]++;
             }
-            const ratingForm = document.getElementById('rating-form');
-            const ratingHeading = document.getElementById('rating-heading');
-            const voteMessage = document.getElementById('vote-message');
-            ratingForm.style.display = 'block';
-            ratingHeading.style.display = 'block';
-            voteMessage.style.display = 'none';
-            const img = document.getElementById('teacher-photo');
-            img.src = `/images/teacher${teacherId}.jpg`;
-            img.onerror = () => {
-                console.error('Client - Fallback image load error for:', teacherId);
-                img.src = '/images/default-teacher.jpg';
-                img.alt = `Default image for teacher ID ${teacherId}`;
-            };
-            document.getElementById('teacher-title').textContent = `Teacher ID ${teacherId}`;
-            document.getElementById('teacher-room').textContent = 'Room: N/A'; // Default room on error
-            document.getElementById('teacher-bio').textContent = 'No bio available due to error.';
-            document.getElementById('teacher-summary').style.display = 'none'; // Hide summary on error
-            document.getElementById('avg-rating').innerHTML = '☆☆☆☆☆';
-            document.getElementById('vote-count').textContent = '(0)';
+        });
+        const total = ratings.length || 1;
+        return Object.keys(distribution).map(stars => ({
+            stars: parseInt(stars),
+            count: distribution[stars],
+            percentage: (distribution[stars] / total) * 100
+        }));
+    }
+
+    function generateRatingsChart(distribution) {
+        return `
+            <div class="chart">
+                ${distribution.map(item => `
+                    <div class="chart-row">
+                        <span class="chart-label">${item.stars}★</span>
+                        <div class="chart-bar-container">
+                            <div class="chart-bar" style="width: ${item.percentage}%;"></div>
+                        </div>
+                        <span class="chart-count">(${item.count})</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    function generateScheduleRows(schedule) {
+        const defaultBlocks = [
+            { block: "Block 1", subject: "Free", grade: "N/A" },
+            { block: "Block 2", subject: "Free", grade: "N/A" },
+            { block: "Block 3", subject: "Free", grade: "N/A" },
+            { block: "Block 4", subject: "Free", grade: "N/A" }
+        ];
+        const blocks = schedule && Array.isArray(schedule) ? schedule : [];
+        const filledSchedule = defaultBlocks.map((defaultBlock, index) => {
+            return blocks[index] || defaultBlock;
+        });
+
+        return filledSchedule.map(block => `
+            <tr>
+                <td>${block.block}</td>
+                <td>${block.subject}</td>
+                <td>${block.grade}</td>
+            </tr>
+        `).join('');
+    }
+
+    function renderStars() {
+        const starRating = document.getElementById('star-rating');
+        if (!starRating) return;
+
+        for (let i = 1; i <= 5; i++) {
+            const star = document.createElement('span');
+            star.className = 'star';
+            star.textContent = '☆';
+            star.addEventListener('click', () => {
+                const stars = starRating.getElementsByClassName('star');
+                for (let j = 0; j < stars.length; j++) {
+                    stars[j].classList.toggle('selected', j < i);
+                    stars[j].textContent = j < i ? '★' : '☆';
+                }
+                document.getElementById('submit-rating').dataset.rating = i;
+            });
+            starRating.appendChild(star);
         }
     }
 
-    // Helper function to infer grade level from class name
-    function getGradeLevel(className) {
-        if (!className || className === 'N/A') return null;
-        const lowerCaseClass = className.toLowerCase();
-        if (lowerCaseClass.includes('9')) return '9th';
-        if (lowerCaseClass.includes('10')) return '10th';
-        if (lowerCaseClass.includes('11')) return '11th';
-        if (lowerCaseClass.includes('12')) return '12th';
-        return 'All'; // Default for non-grade-specific classes (e.g., Art, PE)
+    function renderFirstReview(ratings) {
+        if (ratings.length === 0) return '<p>No reviews yet.</p>';
+        const rating = ratings[0];
+        const escapedComment = (rating.comment || 'No comment').replace(/'/g, "\\'").replace(/"/g, '\\"');
+        return `
+            <div class="review-item">
+                <strong>${'★'.repeat(rating.rating) + '☆'.repeat(5 - rating.rating)}</strong>
+                <span>${escapedComment}</span>
+            </div>
+        `;
     }
 
-    const starRating = document.getElementById('star-rating');
-    let selectedRating = 0;
-    for (let i = 1; i <= 5; i++) {
-        const star = document.createElement('span');
-        star.className = 'star';
-        star.textContent = '☆';
-        star.onclick = () => {
-            selectedRating = i;
-            updateStars();
-        };
-        starRating.appendChild(star);
+    function renderAllReviews(ratings, sortOption) {
+        if (ratings.length === 0) return '<p>No reviews yet.</p>';
+        let sortedRatings = [...ratings];
+        if (sortOption === 'rating-desc') {
+            sortedRatings.sort((a, b) => b.rating - a.rating);
+        } else if (sortOption === 'rating-asc') {
+            sortedRatings.sort((a, b) => a.rating - b.rating);
+        }
+        return sortedRatings.map(rating => {
+            const escapedComment = (rating.comment || 'No comment').replace(/'/g, "\\'").replace(/"/g, '\\"');
+            return `
+                <div class="review-item">
+                    <strong>${'★'.repeat(rating.rating) + '☆'.repeat(5 - rating.rating)}</strong>
+                    <span>${escapedComment}</span>
+                </div>
+            `;
+        }).join('');
     }
-    function updateStars() {
-        const stars = starRating.getElementsByClassName('star');
-        for (let i = 0; i < 5; i++) {
-            stars[i].className = 'star' + (i < selectedRating ? ' selected' : '');
-            stars[i].textContent = i < selectedRating ? '★' : '☆';
+
+    function setupReviews(ratings) {
+        const reviewsList = document.getElementById('reviews-list');
+        if (reviewsList) {
+            reviewsList.innerHTML = renderFirstReview(ratings);
         }
     }
 
-    document.getElementById('rating-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!selectedRating) {
-            showModal('Please select a rating!');
+    async function submitRating() {
+        const rating = parseInt(document.getElementById('submit-rating').dataset.rating);
+        const comment = document.getElementById('rating-comment').value.trim();
+        if (!rating || rating < 1 || rating > 5) {
+            showNotification('Please select a rating between 1 and 5.', true);
             return;
         }
 
-        const comment = document.getElementById('rating-comment').value.trim();
         try {
-            console.log('Client - Submitting vote for teacher', teacherId, 'with comment:', comment);
             const response = await fetch('/api/ratings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ teacher_id: teacherId, rating: selectedRating, comment })
+                credentials: 'include',
+                body: JSON.stringify({ teacher_id: teacherId, rating, comment })
             });
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+            const data = await response.json();
+            if (response.ok) {
+                showNotification('Rating submitted successfully!');
+                hasVoted = true;
+                loadTeacherProfile();
+            } else {
+                showNotification(data.error || 'Failed to submit rating.', true);
             }
-            const result = await response.json();
-            console.log('Client - Vote submitted, response:', result.message);
-
-            const ratingForm = document.getElementById('rating-form');
-            const ratingHeading = document.getElementById('rating-heading');
-            const voteMessage = document.getElementById('vote-message');
-            ratingForm.style.display = 'none';
-            ratingHeading.style.display = 'none';
-            voteMessage.style.display = 'block';
-            showNotification('Your response has been recorded.');
-
-            // Update cookie to reflect the vote
-            const cookieStr = getCookie('votedTeachers') || '';
-            let votedArray = cookieStr ? cookieStr.split(',').map(id => parseInt(id.trim())).filter(Boolean) : [];
-            if (!votedArray.includes(parseInt(teacherId))) {
-                votedArray.push(parseInt(teacherId));
-                setCookie('votedTeachers', votedArray.join(','), 365);
-                console.log('Client - Updated votedTeachers cookie:', votedArray);
-            }
-
-            await loadTeacher();
         } catch (error) {
-            console.error('Client - Error submitting vote:', error.message, error.stack);
-            if (error.message.includes('HTTP error')) {
-                showModal('Error submitting your rating. Please try again.');
-            }
+            console.error('Client - Error submitting rating:', error.message);
+            showNotification('Error submitting rating. Please try again later.', true);
         }
-    });
-
-    function clearVotesForTesting() {
-        setCookie('votedTeachers', '', -1);
-        console.log('Client - Cookies cleared for testing');
     }
 
-    // Uncomment below in browser console for testing
-    // clearVotesForTesting();
+    if (confirmDelete) {
+        confirmDelete.addEventListener('click', async () => {
+            try {
+                const response = await fetch(`/api/admin/teachers/${encodeURIComponent(teacherId)}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showNotification('Teacher deleted successfully!');
+                    setTimeout(() => window.location.href = '/', 2000);
+                } else {
+                    showNotification(data.error || 'Failed to delete teacher.', true);
+                }
+            } catch (error) {
+                console.error('Client - Error deleting teacher:', error.message);
+                showNotification('Error deleting teacher. Please try again later.', true);
+            }
+            hideModal();
+        });
+    }
 
-    await loadTeacher().catch(error => console.error('Client - Initial load error:', error.message, error.stack));
+    if (cancelDelete) {
+        cancelDelete.addEventListener('click', hideModal);
+    }
+
+    loadTeacherProfile();
 });
-
-function setCookie(name, value, days) {
-    const date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/; SameSite=Strict`;
-}
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return '';
-}
